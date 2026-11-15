@@ -1,6 +1,6 @@
 // 01 §3.2・§5・§6・§7 の初期値(10 §4.3)。値は 10 §3.2 の内部単位の整数だけ。
 BalanceSpec(
-    format_version: 5,
+    format_version: 6,
     map: (width: 40, height: 18, margin: 1, initial_area: (16, 10),
           min_spacing: 4, max_nearest: 10, relax_spacings: [3, 2], attempts_per_stage: 1000),
     company: (max_level: 24, cap_base: 4, cap_step: 2, gauge_num: 7, gauge_den: 10,
@@ -31,4 +31,15 @@ BalanceSpec(
               // 会社 Lv B(4 以上)で出た駅・作った路線は、S1・S2・S3・T3・T4 が Lv cap(B − 3) の値段より(M8)、
               // 固有上限のある設備は S1 の Lv cap(B − 3) の値段より安くならない(M10)。
               upgrade_floor: (behind: 3, from_level: 4)),
+    // 転生(T1)。解放条件は累計収入がゴールの 1 無量大数円。ポイント = 基礎点 + 会社レベル × 2。
+    // 強化は転生しても残る。運賃は 1 レベルで 2 倍、電車と路線の枠は 1 レベルで 1 つ増える。
+    rebirth: (
+        points_base: 5, points_per_level: 2,
+        fare_boost_ratio: 2, train_boost_trains: 1, line_boost_slots: 1,
+        upgrades: [
+            (key: FareBoost,  max: 8, base_cost: 2,  cost_ratio: 2),
+            (key: TrainBoost, max: 3, base_cost: 5,  cost_ratio: 3),
+            (key: LineBoost,  max: 2, base_cost: 10, cost_ratio: 3),
+        ],
+    ),
 )

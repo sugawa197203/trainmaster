@@ -43,6 +43,37 @@ fn week_steps(mut d: ParamDef) -> ParamDef {
     d
 }
 
+/// 01 と同じ転生の規則(T1)。
+fn rebirth_01() -> RebirthRules {
+    RebirthRules {
+        points_base: 5,
+        points_per_level: 2,
+        fare_boost_ratio: 2,
+        train_boost_trains: 1,
+        line_boost_slots: 1,
+        upgrades: vec![
+            RebirthUpgradeDef {
+                key: RebirthUpgrade::FareBoost,
+                max: 8,
+                base_cost: 2,
+                cost_ratio: 2,
+            },
+            RebirthUpgradeDef {
+                key: RebirthUpgrade::TrainBoost,
+                max: 3,
+                base_cost: 5,
+                cost_ratio: 3,
+            },
+            RebirthUpgradeDef {
+                key: RebirthUpgrade::LineBoost,
+                max: 2,
+                base_cost: 10,
+                cost_ratio: 3,
+            },
+        ],
+    }
+}
+
 fn lin(v0: u64, step: u64) -> ValueFormula {
     ValueFormula::Linear { v0, step }
 }
@@ -55,7 +86,7 @@ fn geo(v0: u64, ratio: u64) -> ValueFormula {
 fn spec_01() -> BalanceSpec {
     use ParamKey::*;
     BalanceSpec {
-        format_version: 5,
+        format_version: 6,
         map: MapRules {
             width: 40,
             height: 18,
@@ -126,6 +157,7 @@ fn spec_01() -> BalanceSpec {
                 from_level: 4,
             },
         },
+        rebirth: rebirth_01(),
     }
 }
 
@@ -411,7 +443,7 @@ fn each_rule_rejects_a_broken_value() {
     type Mutation = Box<dyn Fn(&mut BalanceSpec)>;
     let cases: Vec<(&str, Mutation)> = vec![
         ("BV-01", Box::new(|s| s.format_version = 4)),
-        ("BV-01", Box::new(|s| s.format_version = 6)),
+        ("BV-01", Box::new(|s| s.format_version = 7)),
         ("BV-02", Box::new(|s| s.params.swap(0, 1))),
         (
             "BV-02",
@@ -914,8 +946,9 @@ fn omitted_cost_steps_is_empty_and_v1_is_rejected() {
         "format_version: 2",
         "format_version: 3",
         "format_version: 4",
+        "format_version: 5",
     ] {
-        let v = BUILTIN_BALANCE_RON.replace("format_version: 5", old);
+        let v = BUILTIN_BALANCE_RON.replace("format_version: 6", old);
         assert!(matches!(
             BalanceTable::from_ron_str(&v),
             Err(BalanceError::Invalid { rule: "BV-01", .. })

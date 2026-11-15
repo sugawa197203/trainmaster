@@ -11,8 +11,8 @@ use crate::sim::movement::advance_all;
 use crate::sim::spawn::spawn_all;
 use crate::sim::topology::fixtures::{line, stations};
 use crate::state::{
-    CompanyState, Direction, GameState, INCOME_WINDOW_SECS, PaxMatrix, Progress, Stats, TrackGrid,
-    Train, TrainPhase,
+    CompanyState, Direction, GameState, INCOME_WINDOW_SECS, PaxMatrix, Progress, RebirthState,
+    Stats, TrackGrid, Train, TrainPhase,
 };
 use crate::time::Tick;
 use crate::units::{Money, People, PosUnits};
@@ -62,6 +62,7 @@ pub(crate) fn state(
             max_money_unit: 0,
             goal_reached: false,
         },
+        rebirth: RebirthState::default(),
         stats: Stats {
             income_this_sec: Money::ZERO,
             income_window: [Money::ZERO; INCOME_WINDOW_SECS],

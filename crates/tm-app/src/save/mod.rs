@@ -46,6 +46,8 @@ pub enum SavePolicy {
 pub(crate) enum SaveCause {
     Interval,
     LevelUp,
+    /// 転生した(T1)。
+    Rebirth,
     SettingsOpened,
     NewGame,
     Quit,

@@ -18,8 +18,8 @@ use crate::rng::RngStreams;
 use crate::routing::Routing;
 use crate::sim::{self, SimScratch};
 use crate::state::{
-    CompanyState, Direction, GameState, INCOME_WINDOW_SECS, PaxMatrix, Progress, Station, Stats,
-    TrackGrid, TrainPhase,
+    CompanyState, Direction, GameState, INCOME_WINDOW_SECS, PaxMatrix, Progress, RebirthState,
+    Station, Stats, TrackGrid, TrainPhase,
 };
 use crate::time::Tick;
 use crate::units::{MilliPeople, Money, People};
@@ -246,6 +246,7 @@ fn initial_state(seed: u64, bal: &BalanceTable, plan: Vec<GridPos>) -> GameState
             max_money_unit: ja_unit_index(money),
             goal_reached: false,
         },
+        rebirth: RebirthState::default(),
         stats: Stats {
             income_this_sec: Money::ZERO,
             income_window: [Money::ZERO; INCOME_WINDOW_SECS],
@@ -374,6 +375,13 @@ pub(crate) fn state_hash(st: &GameState) -> u64 {
     h.write_u16(p.upgraded_once.0);
     h.write_u8(p.max_money_unit);
     h.write_bool(p.goal_reached);
+
+    let r = &st.rebirth;
+    h.write_u32(r.count);
+    h.write_u64(r.points);
+    h.write_u8(r.fare_boost);
+    h.write_u8(r.train_boost);
+    h.write_u8(r.line_boost);
 
     let s = &st.stats;
     h.write_money(s.income_this_sec);

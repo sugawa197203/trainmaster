@@ -7,7 +7,7 @@ use tm_assets::text::{TextArg, TextId};
 use tm_assets::txt;
 use tm_core::{
     BuyMode, Command, CommandError, GameView, LimitKind, LineId, ParamCategory, ParamKey,
-    Recommendation, StationId, UpgradeScope,
+    RebirthUpgrade, Recommendation, StationId, UpgradeScope,
 };
 use tm_input::{Action, ActionFrame, InputDevice};
 use tm_numeric::FormatStyle;
@@ -22,19 +22,45 @@ use crate::layout::PANEL;
 use crate::text::DynText;
 use crate::text::numbers::NumText;
 
-/// タブの順(01 §3.2)。
-pub(crate) const TABS: [ParamCategory; 3] = [
-    ParamCategory::Station,
-    ParamCategory::Train,
-    ParamCategory::Line,
+/// パネルのタブ [01 §3.2、T1]。
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum PanelTab {
+    /// パラメータのタブ。
+    Param(ParamCategory),
+    /// てんせい [T1]。
+    Rebirth,
+}
+
+impl PanelTab {
+    /// パラメータのタブなら `ParamCategory`。
+    pub(crate) const fn category(self) -> Option<ParamCategory> {
+        match self {
+            PanelTab::Param(c) => Some(c),
+            PanelTab::Rebirth => None,
+        }
+    }
+}
+
+impl From<ParamCategory> for PanelTab {
+    fn from(c: ParamCategory) -> Self {
+        PanelTab::Param(c)
+    }
+}
+
+/// タブの順(01 §3.2 + T1)。
+pub(crate) const TABS: [PanelTab; 4] = [
+    PanelTab::Param(ParamCategory::Station),
+    PanelTab::Param(ParamCategory::Train),
+    PanelTab::Param(ParamCategory::Line),
+    PanelTab::Rebirth,
 ];
 const MAX_ROWS: usize = 5;
 /// タブ・対象の行・項目の高さ(13 §3.8 の表)。
 const TAB_H: i32 = 20;
 const SCOPE_H: i32 = 20;
 const ROW_H: i32 = 38;
-/// タブ 1 つの幅。
-const TAB_W: i32 = 68;
+/// タブ 1 つの幅(4 つで内側の幅に収める)。
+const TAB_W: i32 = 52;
 /// 内側の左端と幅(208)。
 const INNER_X: i32 = PANEL.x + 8;
 pub(crate) const INNER_W: u16 = PANEL.w as u16 - 16;
@@ -78,8 +104,16 @@ pub(crate) fn items(tab: ParamCategory) -> &'static [ParamKey] {
     }
 }
 
-fn tab_index(tab: ParamCategory) -> usize {
+fn tab_index(tab: PanelTab) -> usize {
     TABS.iter().position(|&t| t == tab).unwrap_or(0)
+}
+
+/// てんせいタブの行の数(転生する 1 行 + 強化 3 行)。
+const REBIRTH_ROWS: usize = 1 + RebirthUpgrade::ALL.len();
+
+/// てんせいタブの行 `i` の強化(`i ≥ 1`)。
+fn rebirth_item(i: usize) -> RebirthUpgrade {
+    RebirthUpgrade::ALL[i - 1]
 }
 
 fn name_id(p: ParamKey) -> TextId {
@@ -116,11 +150,30 @@ fn desc_id(p: ParamKey) -> TextId {
     }
 }
 
-fn tab_text(tab: ParamCategory) -> TextId {
+fn tab_text(tab: PanelTab) -> TextId {
     match tab {
-        ParamCategory::Station => txt::PANEL_TAB_STATION,
-        ParamCategory::Train => txt::PANEL_TAB_TRAIN,
-        ParamCategory::Line => txt::PANEL_TAB_LINE,
+        PanelTab::Param(ParamCategory::Station) => txt::PANEL_TAB_STATION,
+        PanelTab::Param(ParamCategory::Train) => txt::PANEL_TAB_TRAIN,
+        PanelTab::Param(ParamCategory::Line) => txt::PANEL_TAB_LINE,
+        PanelTab::Rebirth => txt::PANEL_TAB_REBIRTH,
+    }
+}
+
+/// てんせいの強化の名前。
+fn rebirth_name_id(k: RebirthUpgrade) -> TextId {
+    match k {
+        RebirthUpgrade::FareBoost => txt::PANEL_REBIRTH_NAME_FARE,
+        RebirthUpgrade::TrainBoost => txt::PANEL_REBIRTH_NAME_TRAIN,
+        RebirthUpgrade::LineBoost => txt::PANEL_REBIRTH_NAME_LINE,
+    }
+}
+
+/// てんせいの強化の説明。
+fn rebirth_desc_id(k: RebirthUpgrade) -> TextId {
+    match k {
+        RebirthUpgrade::FareBoost => txt::PANEL_REBIRTH_DESC_FARE,
+        RebirthUpgrade::TrainBoost => txt::PANEL_REBIRTH_DESC_TRAIN,
+        RebirthUpgrade::LineBoost => txt::PANEL_REBIRTH_DESC_LINE,
     }
 }
 
@@ -140,19 +193,39 @@ pub(crate) fn cycle(ids: &[u32], origin: Option<u32>, cur: Option<u32>, dir: i32
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Status {
-    Cost { affordable: bool },
+    Cost {
+        affordable: bool,
+    },
     Note(Option<SpriteId>),
+    /// 転生ポイントの値段。星のアイコン [T1]。
+    Points {
+        affordable: bool,
+    },
+    /// 転生でもらえるポイント [T1]。
+    Earn,
+}
+
+/// てんせいタブの行 [T1]。
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RebRow {
+    /// 「転生する」。
+    Do,
+    /// 恒久の強化。
+    Upgrade(RebirthUpgrade),
 }
 
 #[derive(Default)]
 struct Row {
     param: Option<ParamKey>,
+    rebirth: Option<RebRow>,
     name: DynText,
     new: bool,
     level: DynText,
     show_level: bool,
     status: Option<Status>,
     cost: NumText,
+    /// 転生のポイントの値段でもらえるポイントの文。
+    pts: DynText,
     note: DynText,
     dim: bool,
     rec: Option<bool>,
@@ -172,8 +245,8 @@ pub(crate) enum PanelExit {
 /// 強化パネルの状態。
 pub(crate) struct PanelState {
     /// いまのタブ。
-    pub tab: ParamCategory,
-    item: [usize; 3],
+    pub tab: PanelTab,
+    item: [usize; 4],
     /// 「えき」タブの対象(`None` = ぜんぶ)。
     pub target_station: Option<StationId>,
     /// 「電車」「ろせん」タブの対象(`None` = ぜんぶ)。
@@ -185,8 +258,8 @@ pub(crate) struct PanelState {
     pub jump: bool,
     dirty: bool,
     rows: [Row; MAX_ROWS],
-    tabs: [DynText; 3],
-    tab_new: [bool; 3],
+    tabs: [DynText; 4],
+    tab_new: [bool; 4],
     rec_tab: Option<(usize, bool)>,
     scope: DynText,
     scope_arrows: bool,
@@ -197,8 +270,10 @@ pub(crate) struct PanelState {
     new_tag: DynText,
     rec_tag: DynText,
     levelup: DynText,
-    /// 買えた項目と、その時刻(「レベルアップ!」を出す)。
+    /// 買った項目と、その時刻(「レベルアップ!」を出す)。
     flash: Option<(ParamKey, MonoTime)>,
+    /// 「転生する」の 2 段の確認(もう一度 Confirm で確定)[T1]。
+    rebirth_confirm: bool,
     /// 止める説明を出している(`permits` による行の暗さを付けない。UI-D-31)。
     pub explaining: bool,
 }
@@ -206,14 +281,14 @@ pub(crate) struct PanelState {
 impl PanelState {
     /// 開く。`origin` は対象の候補の起点。
     pub(crate) fn open(
-        tab: ParamCategory,
+        tab: PanelTab,
         origin_station: Option<StationId>,
         origin_line: Option<LineId>,
         cx: &mut Ctx<'_, '_>,
     ) -> PanelState {
-        let p = PanelState {
+        let mut p = PanelState {
             tab,
-            item: [0; 3],
+            item: [0; 4],
             target_station: None,
             target_line: None,
             origin_station,
@@ -223,7 +298,7 @@ impl PanelState {
             dirty: true,
             rows: Default::default(),
             tabs: Default::default(),
-            tab_new: [false; 3],
+            tab_new: [false; 4],
             rec_tab: None,
             scope: DynText::default(),
             scope_arrows: false,
@@ -235,17 +310,53 @@ impl PanelState {
             rec_tag: DynText::default(),
             levelup: DynText::default(),
             flash: None,
+            rebirth_confirm: false,
             explaining: false,
         };
-        cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradePanel));
-        cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradeTab(tab)));
+        p.init_items(cx.view);
+        match tab {
+            PanelTab::Param(c) => {
+                cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradePanel));
+                cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradeTab(c)));
+            }
+            PanelTab::Rebirth => {
+                cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradePanel));
+                cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradeRebirth));
+            }
+        }
         p
     }
 
-    /// 選んでいる項目。
+    /// タブごとの項目の数。
+    fn item_count(&self) -> usize {
+        match self.tab {
+            PanelTab::Param(c) => items(c).len(),
+            PanelTab::Rebirth => REBIRTH_ROWS,
+        }
+    }
+
+    /// 開いたときの選択の位置を項目の数に収める(タブを記憶して開き直すとき)。
+    fn init_items(&mut self, view: GameView<'_>) {
+        let i = tab_index(self.tab);
+        self.item[i] = self.item[i].min(self.item_count().saturating_sub(1));
+        let _ = view;
+    }
+
+    /// 選んでいるパラメータの項目(パラメータのタブだけ)。
     pub(crate) fn param(&self) -> ParamKey {
-        let list = items(self.tab);
+        let c = self.tab.category().expect("パラメータのタブ");
+        let list = items(c);
         list[self.item[tab_index(self.tab)].min(list.len() - 1)]
+    }
+
+    /// てんせいタブで選んでいる行 [T1]。
+    fn rebirth_row(&self) -> RebRow {
+        let i = self.item[tab_index(self.tab)];
+        if i == 0 {
+            RebRow::Do
+        } else {
+            RebRow::Upgrade(rebirth_item(i))
+        }
     }
 
     /// 選んでいる項目の購入の対象。R2 は常に会社 [13 §3.8]。
@@ -255,14 +366,12 @@ impl PanelState {
 
     /// おすすめの項目へ(対象は「ぜんぶ」)。
     pub(crate) fn jump_to(&mut self, rec: Recommendation, cx: &mut Ctx<'_, '_>) {
-        self.set_tab(rec.param.category(), cx);
+        self.set_tab(PanelTab::Param(rec.param.category()), cx);
+        let c = rec.param.category();
         let t = tab_index(self.tab);
-        self.item[t] = items(self.tab)
-            .iter()
-            .position(|&p| p == rec.param)
-            .unwrap_or(0);
+        self.item[t] = items(c).iter().position(|&p| p == rec.param).unwrap_or(0);
         match self.tab {
-            ParamCategory::Station => self.target_station = None,
+            PanelTab::Param(ParamCategory::Station) => self.target_station = None,
             _ => self.target_line = None,
         }
         self.jump = true;
@@ -272,20 +381,30 @@ impl PanelState {
         ))));
     }
 
-    fn set_tab(&mut self, tab: ParamCategory, cx: &mut Ctx<'_, '_>) {
+    fn set_tab(&mut self, tab: PanelTab, cx: &mut Ctx<'_, '_>) {
         if tab == self.tab {
             return;
         }
-        cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradeTab(self.tab)));
+        match self.tab {
+            PanelTab::Param(c) => cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradeTab(c))),
+            PanelTab::Rebirth => cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradeRebirth)),
+        }
         self.tab = tab;
-        cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradeTab(tab)));
+        self.rebirth_confirm = false;
+        match tab {
+            PanelTab::Param(c) => cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradeTab(c))),
+            PanelTab::Rebirth => cx.event(UiEvent::MenuOpened(MenuAnchor::UpgradeRebirth)),
+        }
         self.dirty = true;
         self.jump = true;
     }
 
     /// パネルを閉じたときの出来事。
     pub(crate) fn close(&self, cx: &mut Ctx<'_, '_>) {
-        cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradeTab(self.tab)));
+        match self.tab {
+            PanelTab::Param(c) => cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradeTab(c))),
+            PanelTab::Rebirth => cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradeRebirth)),
+        }
         cx.event(UiEvent::MenuClosed(MenuAnchor::UpgradePanel));
     }
 
@@ -328,15 +447,18 @@ impl PanelState {
         };
         if dy != 0 {
             let t = tab_index(self.tab);
-            let n = items(self.tab).len() as i32;
+            let n = self.item_count() as i32;
             let next = (self.item[t] as i32 + dy).clamp(0, n - 1) as usize;
             if next != self.item[t] {
                 self.item[t] = next;
+                self.rebirth_confirm = false;
                 self.dirty = true;
                 cx.se(SE_CURSOR);
-                cx.event(UiEvent::CursorOn(UiAnchor::Menu(MenuAnchor::UpgradeItem(
-                    self.param(),
-                ))));
+                if let Some(p) = self.selected_param() {
+                    cx.event(UiEvent::CursorOn(UiAnchor::Menu(MenuAnchor::UpgradeItem(
+                        p,
+                    ))));
+                }
             }
         }
         let dx = if both(Action::MoveLeft, Action::MoveRight) {
@@ -344,23 +466,67 @@ impl PanelState {
         } else {
             i32::from(step(Action::MoveRight)) - i32::from(step(Action::MoveLeft))
         };
-        if dx != 0 && self.param() != ParamKey::R2LineSlots && self.switch_target(dx, cx.view) {
+        if dx != 0
+            && matches!(self.tab, PanelTab::Param(_))
+            && self.param() != ParamKey::R2LineSlots
+            && self.switch_target(dx, cx.view)
+        {
             cx.se(SE_CURSOR);
             cx.event(UiEvent::CursorOn(UiAnchor::Menu(MenuAnchor::ScopeToggle)));
         }
-        if pressed(Action::BuyMax) {
+        if pressed(Action::BuyMax) && matches!(self.tab, PanelTab::Param(_)) {
             self.buy(BuyMode::Max, cx);
         } else if pressed(Action::Confirm)
             || (input.repeated.contains(Action::Confirm) && !self.buy_blocked)
         {
-            self.buy(BuyMode::One, cx);
+            self.confirm(cx);
         }
         PanelExit::Stay
     }
 
+    /// 選んでいる項目のパラメータ(てんせいタブは `None`)。
+    fn selected_param(&self) -> Option<ParamKey> {
+        self.tab.category().map(|_| self.param())
+    }
+
+    /// 決定ボタン [T1]。
+    fn confirm(&mut self, cx: &mut Ctx<'_, '_>) {
+        match self.tab {
+            PanelTab::Param(_) => self.buy(BuyMode::One, cx),
+            PanelTab::Rebirth => match self.rebirth_row() {
+                RebRow::Do => {
+                    // 2 段の確認: 1 回目で「もう一度」を出し、2 回目で転生する。
+                    if !cx.view.rebirth().can_rebirth {
+                        cx.se(SE_ERROR);
+                        self.rebirth_confirm = false;
+                        return;
+                    }
+                    if self.rebirth_confirm {
+                        self.rebirth_confirm = false;
+                        let cmd = Command::Rebirth;
+                        if !cx.submit(cmd) {
+                            self.rebirth_confirm = true;
+                        }
+                    } else {
+                        self.rebirth_confirm = true;
+                        self.dirty = true;
+                        cx.se(SE_CURSOR);
+                    }
+                }
+                RebRow::Upgrade(u) => {
+                    self.rebirth_confirm = false;
+                    let cmd = Command::RebirthUpgrade { upgrade: u };
+                    if !cx.submit(cmd) {
+                        self.buy_blocked = true;
+                    }
+                }
+            },
+        }
+    }
+
     fn switch_target(&mut self, dir: i32, view: GameView<'_>) -> bool {
         let changed = match self.tab {
-            ParamCategory::Station => {
+            PanelTab::Param(ParamCategory::Station) => {
                 let ids: Vec<u32> = view
                     .stations()
                     .filter(|s| s.connected)
@@ -421,9 +587,27 @@ impl PanelState {
         self.fix_targets(view);
         for (i, t) in TABS.iter().enumerate() {
             self.tabs[i].set(tab_text(*t), &[], FontId::Body12, INNER_W, dev);
-            self.tab_new[i] = items(*t).iter().any(|&p| view.is_new(p));
+            self.tab_new[i] = match t.category() {
+                Some(c) => items(c).iter().any(|&p| view.is_new(p)),
+                None => view.rebirth().upgrades.iter().any(|u| u.affordable),
+            };
         }
-        self.rec_tab = rec.map(|r| (tab_index(r.param.category()), r.affordable));
+        self.rec_tab = rec.map(|r| (tab_index(PanelTab::Param(r.param.category())), r.affordable));
+        match self.tab {
+            PanelTab::Rebirth => self.refresh_rebirth(view, gate, dev),
+            PanelTab::Param(_) => self.refresh_params(view, gate, rec, dev),
+        }
+    }
+
+    /// パラメータのタブの表示 [13 §3.8]。
+    fn refresh_params(
+        &mut self,
+        view: GameView<'_>,
+        gate: Gate<'_>,
+        rec: Option<Recommendation>,
+        dev: InputDevice,
+    ) {
+        let c = self.tab.category().expect("パラメータのタブ");
         let r2 = self.param() == ParamKey::R2LineSlots;
         let (scope_id, arrows) = if r2 {
             (txt::PANEL_SCOPE_COMPANY, false)
@@ -445,15 +629,17 @@ impl PanelState {
         self.levelup
             .set(txt::PANEL_LEVELUP, &[], FontId::Body12, INNER_W, dev);
 
-        let list = items(self.tab);
+        let list = items(c);
         let selected = self.param();
         let mut foot_err = None;
         for (i, row) in self.rows.iter_mut().enumerate() {
             let Some(&p) = list.get(i) else {
                 row.param = None;
+                row.rebirth = None;
                 continue;
             };
             row.param = Some(p);
+            row.rebirth = None;
             row.name.set(name_id(p), &[], FontId::Body12, INNER_W, dev);
             row.new = view.is_new(p);
             let scope = scope_for(p, self.target_station, self.target_line);
@@ -490,7 +676,7 @@ impl PanelState {
                     Status::Cost { affordable: false }
                 }
                 Err(e) => {
-                    let (id, icon, n) = status_note(e, self.tab);
+                    let (id, icon, n) = status_note(e, c);
                     let mut buf = [0u8; 4];
                     match n {
                         Some(n) => row.note.set(
@@ -532,6 +718,131 @@ impl PanelState {
         }
     }
 
+    /// てんせいタブの表示 [T1]。
+    fn refresh_rebirth(&mut self, view: GameView<'_>, gate: Gate<'_>, dev: InputDevice) {
+        let r = view.rebirth();
+        // 対象行の代わりに、ポイントの所持数を出す。
+        let mut points_buf = [0u8; 8];
+        self.scope.set(
+            txt::PANEL_REBIRTH_POINTS,
+            &[TextArg {
+                name: "n",
+                value: decimal(r.points, &mut points_buf),
+            }],
+            FontId::Body12,
+            INNER_W,
+            dev,
+        );
+        self.scope_arrows = false;
+        let selected = self.item[tab_index(self.tab)];
+        self.hint
+            .set(txt::PANEL_REBIRTH_HINT, &[], FontId::Body12, INNER_W, dev);
+        self.new_tag
+            .set(txt::PANEL_NEW, &[], FontId::Body12, INNER_W, dev);
+        self.levelup
+            .set(txt::PANEL_LEVELUP, &[], FontId::Body12, INNER_W, dev);
+        let mut buf_a = [0u8; 8];
+        let mut buf_b = [0u8; 8];
+        for (i, row) in self.rows.iter_mut().enumerate() {
+            if i >= REBIRTH_ROWS {
+                row.param = None;
+                row.rebirth = None;
+                continue;
+            }
+            row.param = None;
+            row.rec = None;
+            if i == 0 {
+                row.rebirth = Some(RebRow::Do);
+                row.name
+                    .set(txt::PANEL_REBIRTH_DO, &[], FontId::Body12, INNER_W, dev);
+                row.show_level = false;
+                row.new = false;
+                row.dim = !gate.permits(&Command::Rebirth);
+                row.status = Some(if !r.can_rebirth {
+                    row.note
+                        .set(txt::PANEL_REBIRTH_LOCK, &[], FontId::Body12, INNER_W, dev);
+                    Status::Note(Some(sprite::ICO_LOCK))
+                } else if self.rebirth_confirm && selected == 0 {
+                    row.note.set(
+                        txt::PANEL_REBIRTH_DO_AGAIN,
+                        &[],
+                        FontId::Body12,
+                        INNER_W,
+                        dev,
+                    );
+                    Status::Note(None)
+                } else {
+                    row.pts.set(
+                        txt::PANEL_REBIRTH_EARN,
+                        &[TextArg {
+                            name: "n",
+                            value: decimal(r.next_points, &mut buf_a),
+                        }],
+                        FontId::Body12,
+                        INNER_W,
+                        dev,
+                    );
+                    Status::Earn
+                });
+                continue;
+            }
+            let k = rebirth_item(i);
+            let uv = r.upgrades[k.index()];
+            row.rebirth = Some(RebRow::Upgrade(k));
+            row.name
+                .set(rebirth_name_id(k), &[], FontId::Body12, INNER_W, dev);
+            row.new = false;
+            row.dim = !gate.permits(&Command::RebirthUpgrade { upgrade: k });
+            if uv.level >= uv.max {
+                row.show_level = false;
+                row.note
+                    .set(txt::PANEL_REBIRTH_LV_MAX, &[], FontId::Body12, INNER_W, dev);
+                row.status = Some(Status::Note(Some(sprite::ICO_CROWN)));
+            } else {
+                row.show_level = true;
+                let a = decimal(u64::from(uv.level), &mut buf_a);
+                let b = decimal(u64::from(uv.max), &mut buf_b);
+                row.level.set(
+                    txt::PANEL_REBIRTH_LV,
+                    &[
+                        TextArg {
+                            name: "a",
+                            value: a,
+                        },
+                        TextArg {
+                            name: "b",
+                            value: b,
+                        },
+                    ],
+                    FontId::Body12,
+                    INNER_W,
+                    dev,
+                );
+                let cost = uv.cost.unwrap_or(0);
+                row.pts.set(
+                    txt::PANEL_REBIRTH_EARN,
+                    &[TextArg {
+                        name: "n",
+                        value: decimal(cost, &mut buf_a),
+                    }],
+                    FontId::Body12,
+                    INNER_W,
+                    dev,
+                );
+                row.status = Some(Status::Points {
+                    affordable: uv.affordable,
+                });
+            }
+        }
+        // 下の欄: 選んでいる行の説明。
+        self.foot_need = false;
+        let foot = match selected {
+            0 => txt::PANEL_REBIRTH_DESC_REBIRTH,
+            i => rebirth_desc_id(rebirth_item(i)),
+        };
+        self.foot.set(foot, &[], FontId::Body12, INNER_W, dev);
+    }
+
     fn fix_targets(&mut self, view: GameView<'_>) {
         if self
             .target_station
@@ -551,15 +862,16 @@ impl PanelState {
         paths: &[Vec<tm_core::GridPos>],
     ) -> Option<tm_core::GridPos> {
         match self.tab {
-            ParamCategory::Station => self
+            PanelTab::Param(ParamCategory::Station) => self
                 .target_station
                 .and_then(|s| view.station(s))
                 .map(|s| s.pos),
-            _ => self
+            PanelTab::Param(_) => self
                 .target_line
                 .and_then(|l| paths.get(l.index()))
                 .and_then(|p| p.get(p.len() / 2))
                 .copied(),
+            PanelTab::Rebirth => None,
         }
     }
 
@@ -579,12 +891,12 @@ impl PanelState {
             );
         };
         match self.tab {
-            ParamCategory::Station => {
+            PanelTab::Param(ParamCategory::Station) => {
                 if let Some(st) = self.target_station.and_then(|s| view.station(s)) {
                     frame(b, st.pos);
                 }
             }
-            _ => {
+            PanelTab::Param(_) => {
                 if let Some(line) = self.target_line.and_then(|l| view.line(l)) {
                     for st in line.stations.iter().filter_map(|&s| view.station(s)) {
                         frame(b, st.pos);
@@ -598,6 +910,7 @@ impl PanelState {
                     }
                 }
             }
+            PanelTab::Rebirth => {}
         }
     }
 
@@ -640,7 +953,7 @@ impl PanelState {
                 SCOPE_Y + 6,
                 palette::WHITE,
             );
-            if let (ParamCategory::Train | ParamCategory::Line, Some(l)) =
+            if let (PanelTab::Param(ParamCategory::Train | ParamCategory::Line), Some(l)) =
                 (self.tab, self.target_line)
             {
                 b.sprite(
@@ -654,7 +967,9 @@ impl PanelState {
 
         let selected = self.item[tab_index(self.tab)];
         for (i, row) in self.rows.iter().enumerate() {
-            let Some(_) = row.param else { continue };
+            if row.param.is_none() && row.rebirth.is_none() {
+                continue;
+            }
             let r = row_rect(i);
             let y = r.y;
             if i == selected {
@@ -664,7 +979,11 @@ impl PanelState {
                 let a = blink_alpha(now);
                 b.nine_slice(&sprite::NS_UI_SEL, r, with_alpha(palette::HIGHLIGHT, a));
             }
-            let grey = !matches!(row.status, Some(Status::Cost { affordable: true }));
+            let grey = !matches!(
+                row.status,
+                Some(Status::Cost { affordable: true } | Status::Points { affordable: true })
+                    | Some(Status::Earn)
+            );
             let name_c = if grey {
                 palette::TEXT_DISABLED
             } else {
@@ -705,6 +1024,23 @@ impl PanelState {
                     b.text(&row.cost.block, EDGE - w, y2, c);
                     left_end = EDGE - w - 16;
                     b.sprite(icon, left_end, y2 + 2, palette::WHITE);
+                }
+                Some(Status::Points { affordable }) => {
+                    let w = i32::from(row.pts.block.width);
+                    let c = if affordable {
+                        palette::TEXT
+                    } else {
+                        palette::TEXT_DISABLED
+                    };
+                    b.text(&row.pts.block, EDGE - w, y2, c);
+                    left_end = EDGE - w - 16;
+                    b.sprite(star(affordable), left_end, y2 + 2, palette::WHITE);
+                }
+                Some(Status::Earn) => {
+                    let w = i32::from(row.pts.block.width);
+                    b.text(&row.pts.block, EDGE - w, y2, palette::TEXT);
+                    left_end = EDGE - w - 16;
+                    b.sprite(sprite::ICO_STAR, left_end, y2 + 2, palette::WHITE);
                 }
                 Some(Status::Note(icon)) => {
                     let w = i32::from(row.note.block.width);
@@ -759,7 +1095,8 @@ impl PanelState {
     pub(crate) fn part_rect(&self, part: MenuAnchor) -> Option<Rect> {
         match part {
             MenuAnchor::UpgradePanel => Some(PANEL),
-            MenuAnchor::UpgradeTab(c) => Some(tab_rect(tab_index(c))),
+            MenuAnchor::UpgradeRebirth => Some(tab_rect(tab_index(PanelTab::Rebirth))),
+            MenuAnchor::UpgradeTab(c) => Some(tab_rect(tab_index(PanelTab::Param(c)))),
             MenuAnchor::UpgradeItem(p) => {
                 let i = self.rows.iter().position(|r| r.param == Some(p))?;
                 Some(row_rect(i))
@@ -797,7 +1134,9 @@ impl PanelState {
             return Some(rect(TEXT_X - 4, y2 - 2, (w + 8) as u32, 20));
         }
         let (t, _) = self.rec_tab?;
-        self.part_rect(MenuAnchor::UpgradeTab(TABS[t]))
+        self.part_rect(MenuAnchor::UpgradeTab(
+            TABS[t].category().expect("おすすめはパラメータのタブ"),
+        ))
     }
 
     /// 選んでいる項目の番号(テスト用)。
@@ -1009,7 +1348,9 @@ mod tests {
             ]
         );
         for t in TABS {
-            assert!(items(t).iter().all(|p| p.category() == t));
+            if let Some(c) = t.category() {
+                assert!(items(c).iter().all(|&p| p.category() == c));
+            }
         }
     }
 

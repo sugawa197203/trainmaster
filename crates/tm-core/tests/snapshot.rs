@@ -101,7 +101,7 @@ fn snapshot_ron_golden() {
 }
 
 /// 前の版の写しは断る。panic しない。M7(`SNAPSHOT_FORMAT_VERSION` 1)は `born_level` がなく RON として読めない。
-/// M8・M9(形式 2、`RULES_VERSION` 3・4)は読めるが `RulesVersion` で断る。
+/// M8〜M10(形式 2、`RULES_VERSION` 3・4)は読めるが `Format` で断る。
 #[test]
 fn previous_format_snapshot_is_refused() {
     let read = |name: &str| {
@@ -112,12 +112,12 @@ fn previous_format_snapshot_is_refused() {
     };
     let err = ron::from_str::<GameSnapshot>(&read("snapshot_rules2.ron")).expect_err("形式 1");
     assert!(err.to_string().contains("born_level"), "{err}");
-    for (name, rules) in [("snapshot_rules3.ron", 3), ("snapshot_rules4.ron", 4)] {
+    for name in ["snapshot_rules3.ron", "snapshot_rules4.ron"] {
         let s: GameSnapshot = ron::from_str(&read(name)).expect("形式 2 は読める");
         let r = Game::restore(std::sync::Arc::new(tm_core::BalanceTable::builtin()), &s);
         assert_eq!(
             r.map(|_| ()),
-            Err(tm_core::SnapshotError::RulesVersion { found: rules }),
+            Err(tm_core::SnapshotError::Format { found: 2 }),
             "{name}"
         );
     }

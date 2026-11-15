@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::geom::Bend;
 use crate::ids::{CompanyLevel, Level, LineId, StationId};
-use crate::param::{BuyMode, Feature, LimitKind, ParamKey, UpgradeScope};
+use crate::param::{BuyMode, Feature, LimitKind, ParamKey, RebirthUpgrade, UpgradeScope};
 use crate::units::Money;
 
 /// プレイヤーの操作(コアの状態を変えるものだけ。10 §5.1)。
@@ -35,6 +35,13 @@ pub enum Command {
         /// 1 段か MAX か。
         mode: BuyMode,
     },
+    /// 転生する [T1]。会社は最初からやり直し、転生ポイントをもらう。
+    Rebirth,
+    /// 転生ポイントで恒久の強化を買う [T1]。
+    RebirthUpgrade {
+        /// 買う強化。
+        upgrade: RebirthUpgrade,
+    },
 }
 
 /// 路線の端。
@@ -60,6 +67,13 @@ pub enum CommandKind {
         /// 1 段か MAX か。
         mode: BuyMode,
     },
+    /// `Command::Rebirth`。
+    Rebirth,
+    /// `Command::RebirthUpgrade`。
+    RebirthUpgrade {
+        /// 買う強化。
+        upgrade: RebirthUpgrade,
+    },
 }
 
 impl Command {
@@ -72,6 +86,10 @@ impl Command {
                 param: *param,
                 mode: *mode,
             },
+            Command::Rebirth => CommandKind::Rebirth,
+            Command::RebirthUpgrade { upgrade } => {
+                CommandKind::RebirthUpgrade { upgrade: *upgrade }
+            }
         }
     }
 }
@@ -164,6 +182,20 @@ pub enum CommandError {
         required: Money,
         /// 所持金。
         available: Money,
+    },
+    /// 転生の条件(累計収入がゴールの 1 無量大数円)に届いていない [T1]。
+    RebirthNotReady,
+    /// 転生の強化がすでに最大レベル [T1]。
+    RebirthUpgradeMaxed {
+        /// 強化。
+        upgrade: RebirthUpgrade,
+    },
+    /// 転生ポイントが足りない [T1]。
+    RebirthUpgradePoints {
+        /// 必要なポイント。
+        required: u64,
+        /// 持っているポイント。
+        available: u64,
     },
 }
 

@@ -19,7 +19,7 @@ use tm_tutorial::{Tutorial, TutorialDirective, UiEvent};
 
 pub(crate) use build::BuildState;
 pub(crate) use explain::ExplainView;
-pub(crate) use panel::PanelState;
+pub(crate) use panel::{PanelState, PanelTab};
 pub(crate) use play::UiSound;
 use play::{Ctx, Gate, show_error};
 pub(crate) use settings_menu::SettingsMenu;
@@ -464,7 +464,7 @@ pub(crate) struct PlayScene {
     recommendation: Option<Recommendation>,
     rec_refresh_at: Option<MonoTime>,
     input: InputCtx,
-    last_tab: ParamCategory,
+    last_tab: PanelTab,
     dev: InputDevice,
     /// UI の操作で鳴らす音。`Ui` が毎フレーム取り出す。
     pub sounds: Vec<UiSound>,
@@ -507,7 +507,7 @@ impl PlayScene {
             recommendation: None,
             rec_refresh_at: None,
             input: InputCtx::default(),
-            last_tab: ParamCategory::Station,
+            last_tab: PanelTab::Param(ParamCategory::Station),
             dev: InputDevice::Keyboard,
             sounds: Vec::new(),
             events: Vec::new(),
@@ -717,6 +717,11 @@ impl PlayScene {
             }
             GameEvent::StationSpawned { id, .. } => self.anims.station_spawned(now, id),
             GameEvent::TrainAdded { train, .. } => self.anims.train_added(now, train),
+            GameEvent::Rebirth { points_earned, .. } => {
+                self.hud.refresh.force();
+                self.anims.rebirth(now, points_earned);
+            }
+            GameEvent::RebirthUpgraded { .. } => self.hud.refresh.force(),
             GameEvent::PassThroughResolved { .. } | GameEvent::RoutesRecomputed { .. } => {}
         }
     }

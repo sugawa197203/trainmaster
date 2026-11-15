@@ -37,157 +37,177 @@ pub mod txt {
     pub const ERR_NOT_CONNECTED: TextId = TextId(33);
     pub const ERR_NOT_END: TextId = TextId(34);
     pub const ERR_NOT_STATION: TextId = TextId(35);
-    pub const ERR_TOO_FEW: TextId = TextId(36);
-    pub const ERR_TUTORIAL: TextId = TextId(37);
-    pub const EXPL_CLOSE: TextId = TextId(38);
-    pub const EXPL_NEXT: TextId = TextId(39);
-    pub const EXPL_PAGE: TextId = TextId(40);
-    pub const HUD_COMPANY_LEVEL: TextId = TextId(41);
-    pub const HUD_GOAL: TextId = TextId(42);
-    pub const HUD_GOAL_DONE: TextId = TextId(43);
-    pub const HUD_INCOME: TextId = TextId(44);
-    pub const HUD_INFO_CARS: TextId = TextId(45);
-    pub const HUD_INFO_LINE: TextId = TextId(46);
-    pub const HUD_INFO_NOT_CONNECTED: TextId = TextId(47);
-    pub const HUD_INFO_PASS_COUNT: TextId = TextId(48);
-    pub const HUD_INFO_SLOTS: TextId = TextId(49);
-    pub const HUD_INFO_STATION: TextId = TextId(50);
-    pub const HUD_INFO_TRAINS: TextId = TextId(51);
-    pub const HUD_INFO_WAITING: TextId = TextId(52);
-    pub const NOTICE_COMPANY_UP: TextId = TextId(53);
-    pub const NOTICE_COMPANY_UP2: TextId = TextId(54);
-    pub const NOTICE_GOAL: TextId = TextId(55);
-    pub const NOTICE_PASS: TextId = TextId(56);
-    pub const NOTICE_UNIT: TextId = TextId(57);
-    pub const NOTICE_UNLOCKED: TextId = TextId(58);
-    pub const PANEL_HINT: TextId = TextId(59);
-    pub const PANEL_LEVEL: TextId = TextId(60);
-    pub const PANEL_LEVEL_RANGE: TextId = TextId(61);
-    pub const PANEL_LEVELUP: TextId = TextId(62);
-    pub const PANEL_LIMIT_CAPACITY: TextId = TextId(63);
-    pub const PANEL_LIMIT_COMPANY: TextId = TextId(64);
-    pub const PANEL_LIMIT_INTRINSIC: TextId = TextId(65);
-    pub const PANEL_LIMIT_PLATFORM: TextId = TextId(66);
-    pub const PANEL_LOCKED: TextId = TextId(67);
-    pub const PANEL_NEED_MORE: TextId = TextId(68);
-    pub const PANEL_NEW: TextId = TextId(69);
-    pub const PANEL_NO_LINE: TextId = TextId(70);
-    pub const PANEL_NO_STATION: TextId = TextId(71);
-    pub const PANEL_RECOMMEND: TextId = TextId(72);
-    pub const PANEL_SCOPE_ALL: TextId = TextId(73);
-    pub const PANEL_SCOPE_COMPANY: TextId = TextId(74);
-    pub const PANEL_SCOPE_LINE: TextId = TextId(75);
-    pub const PANEL_SCOPE_STATION: TextId = TextId(76);
-    pub const PANEL_TAB_LINE: TextId = TextId(77);
-    pub const PANEL_TAB_STATION: TextId = TextId(78);
-    pub const PANEL_TAB_TRAIN: TextId = TextId(79);
-    pub const PARAM_R1_DESC: TextId = TextId(80);
-    pub const PARAM_R1_NAME: TextId = TextId(81);
-    pub const PARAM_R2_DESC: TextId = TextId(82);
-    pub const PARAM_R2_NAME: TextId = TextId(83);
-    pub const PARAM_R3_DESC: TextId = TextId(84);
-    pub const PARAM_R3_NAME: TextId = TextId(85);
-    pub const PARAM_S1_DESC: TextId = TextId(86);
-    pub const PARAM_S1_NAME: TextId = TextId(87);
-    pub const PARAM_S2_DESC: TextId = TextId(88);
-    pub const PARAM_S2_NAME: TextId = TextId(89);
-    pub const PARAM_S3_DESC: TextId = TextId(90);
-    pub const PARAM_S3_NAME: TextId = TextId(91);
-    pub const PARAM_S4_DESC: TextId = TextId(92);
-    pub const PARAM_S4_NAME: TextId = TextId(93);
-    pub const PARAM_T1_DESC: TextId = TextId(94);
-    pub const PARAM_T1_NAME: TextId = TextId(95);
-    pub const PARAM_T2_DESC: TextId = TextId(96);
-    pub const PARAM_T2_NAME: TextId = TextId(97);
-    pub const PARAM_T3_DESC: TextId = TextId(98);
-    pub const PARAM_T3_NAME: TextId = TextId(99);
-    pub const PARAM_T4_DESC: TextId = TextId(100);
-    pub const PARAM_T4_NAME: TextId = TextId(101);
-    pub const PARAM_T5_DESC: TextId = TextId(102);
-    pub const PARAM_T5_NAME: TextId = TextId(103);
-    pub const QUIT_CONFIRM1: TextId = TextId(104);
-    pub const QUIT_CONFIRM1_NOSAVE: TextId = TextId(105);
-    pub const QUIT_CONFIRM2: TextId = TextId(106);
-    pub const QUIT_POWER_OFF: TextId = TextId(107);
-    pub const QUIT_SAVING: TextId = TextId(108);
-    pub const RESET_CONFIRM1: TextId = TextId(109);
-    pub const RESET_CONFIRM2: TextId = TextId(110);
-    pub const SETTINGS_CONTINUE: TextId = TextId(111);
-    pub const SETTINGS_MUSIC: TextId = TextId(112);
-    pub const SETTINGS_OFF: TextId = TextId(113);
-    pub const SETTINGS_ON: TextId = TextId(114);
-    pub const SETTINGS_QUIT: TextId = TextId(115);
-    pub const SETTINGS_REPLAY: TextId = TextId(116);
-    pub const SETTINGS_REPLAY_EMPTY: TextId = TextId(117);
-    pub const SETTINGS_RESET: TextId = TextId(118);
-    pub const SETTINGS_SHOW: TextId = TextId(119);
-    pub const SETTINGS_SOUND: TextId = TextId(120);
-    pub const SETTINGS_TITLE: TextId = TextId(121);
-    pub const TITLE_CONTINUE: TextId = TextId(122);
-    pub const TITLE_HINT: TextId = TextId(123);
-    pub const TITLE_NEW_CONFIRM1: TextId = TextId(124);
-    pub const TITLE_NEW_GAME: TextId = TextId(125);
-    pub const TITLE_SUBTITLE: TextId = TextId(126);
-    pub const TUT_S01_P1: TextId = TextId(127);
-    pub const TUT_S01_P2: TextId = TextId(128);
-    pub const TUT_S01_TITLE: TextId = TextId(129);
-    pub const TUT_S02_G1: TextId = TextId(130);
-    pub const TUT_S02_P1: TextId = TextId(131);
-    pub const TUT_S02_TITLE: TextId = TextId(132);
-    pub const TUT_S03_G1: TextId = TextId(133);
-    pub const TUT_S03_P1: TextId = TextId(134);
-    pub const TUT_S03_P2: TextId = TextId(135);
-    pub const TUT_S03_P3: TextId = TextId(136);
-    pub const TUT_S03_TITLE: TextId = TextId(137);
-    pub const TUT_S04_P1: TextId = TextId(138);
-    pub const TUT_S04_TITLE: TextId = TextId(139);
-    pub const TUT_S04_W: TextId = TextId(140);
-    pub const TUT_S05_G1: TextId = TextId(141);
-    pub const TUT_S05_P1: TextId = TextId(142);
-    pub const TUT_S05_P2: TextId = TextId(143);
-    pub const TUT_S05_TITLE: TextId = TextId(144);
-    pub const TUT_S06_G1: TextId = TextId(145);
-    pub const TUT_S06_P1: TextId = TextId(146);
-    pub const TUT_S06_P2: TextId = TextId(147);
-    pub const TUT_S06_TITLE: TextId = TextId(148);
-    pub const TUT_S06_W: TextId = TextId(149);
-    pub const TUT_S07_G1: TextId = TextId(150);
-    pub const TUT_S07_P1: TextId = TextId(151);
-    pub const TUT_S07_P2: TextId = TextId(152);
-    pub const TUT_S07_TITLE: TextId = TextId(153);
-    pub const TUT_S08_P1: TextId = TextId(154);
-    pub const TUT_S08_TITLE: TextId = TextId(155);
-    pub const TUT_S09_G1: TextId = TextId(156);
-    pub const TUT_S09_G2: TextId = TextId(157);
-    pub const TUT_S09_P1: TextId = TextId(158);
-    pub const TUT_S09_P2: TextId = TextId(159);
-    pub const TUT_S09_P3: TextId = TextId(160);
-    pub const TUT_S09_P4: TextId = TextId(161);
-    pub const TUT_S09_TITLE: TextId = TextId(162);
-    pub const TUT_S10_G1: TextId = TextId(163);
-    pub const TUT_S10_G2: TextId = TextId(164);
-    pub const TUT_S10_P1: TextId = TextId(165);
-    pub const TUT_S10_P2: TextId = TextId(166);
-    pub const TUT_S10_TITLE: TextId = TextId(167);
-    pub const TUT_S11_G1: TextId = TextId(168);
-    pub const TUT_S11_G2: TextId = TextId(169);
-    pub const TUT_S11_P1: TextId = TextId(170);
-    pub const TUT_S11_P2: TextId = TextId(171);
-    pub const TUT_S11_TITLE: TextId = TextId(172);
-    pub const TUT_S12_G1: TextId = TextId(173);
-    pub const TUT_S12_G2: TextId = TextId(174);
-    pub const TUT_S12_P1: TextId = TextId(175);
-    pub const TUT_S12_P2: TextId = TextId(176);
-    pub const TUT_S12_P3: TextId = TextId(177);
-    pub const TUT_S12_TITLE: TextId = TextId(178);
-    pub const TUT_S14_P1: TextId = TextId(179);
-    pub const TUT_S14_TITLE: TextId = TextId(180);
-    pub const TUT_S15_P1: TextId = TextId(181);
-    pub const TUT_S15_P2: TextId = TextId(182);
-    pub const TUT_S15_P3: TextId = TextId(183);
-    pub const TUT_S15_TITLE: TextId = TextId(184);
+    pub const ERR_REBIRTH_MAXED: TextId = TextId(36);
+    pub const ERR_REBIRTH_NOT_READY: TextId = TextId(37);
+    pub const ERR_REBIRTH_POINTS: TextId = TextId(38);
+    pub const ERR_TOO_FEW: TextId = TextId(39);
+    pub const ERR_TUTORIAL: TextId = TextId(40);
+    pub const EXPL_CLOSE: TextId = TextId(41);
+    pub const EXPL_NEXT: TextId = TextId(42);
+    pub const EXPL_PAGE: TextId = TextId(43);
+    pub const HUD_COMPANY_LEVEL: TextId = TextId(44);
+    pub const HUD_GOAL: TextId = TextId(45);
+    pub const HUD_GOAL_DONE: TextId = TextId(46);
+    pub const HUD_INCOME: TextId = TextId(47);
+    pub const HUD_INFO_CARS: TextId = TextId(48);
+    pub const HUD_INFO_LINE: TextId = TextId(49);
+    pub const HUD_INFO_NOT_CONNECTED: TextId = TextId(50);
+    pub const HUD_INFO_PASS_COUNT: TextId = TextId(51);
+    pub const HUD_INFO_SLOTS: TextId = TextId(52);
+    pub const HUD_INFO_STATION: TextId = TextId(53);
+    pub const HUD_INFO_TRAINS: TextId = TextId(54);
+    pub const HUD_INFO_WAITING: TextId = TextId(55);
+    pub const NOTICE_COMPANY_UP: TextId = TextId(56);
+    pub const NOTICE_COMPANY_UP2: TextId = TextId(57);
+    pub const NOTICE_GOAL: TextId = TextId(58);
+    pub const NOTICE_PASS: TextId = TextId(59);
+    pub const NOTICE_REBIRTH: TextId = TextId(60);
+    pub const NOTICE_UNIT: TextId = TextId(61);
+    pub const NOTICE_UNLOCKED: TextId = TextId(62);
+    pub const PANEL_HINT: TextId = TextId(63);
+    pub const PANEL_LEVEL: TextId = TextId(64);
+    pub const PANEL_LEVEL_RANGE: TextId = TextId(65);
+    pub const PANEL_LEVELUP: TextId = TextId(66);
+    pub const PANEL_LIMIT_CAPACITY: TextId = TextId(67);
+    pub const PANEL_LIMIT_COMPANY: TextId = TextId(68);
+    pub const PANEL_LIMIT_INTRINSIC: TextId = TextId(69);
+    pub const PANEL_LIMIT_PLATFORM: TextId = TextId(70);
+    pub const PANEL_LOCKED: TextId = TextId(71);
+    pub const PANEL_NEED_MORE: TextId = TextId(72);
+    pub const PANEL_NEW: TextId = TextId(73);
+    pub const PANEL_NO_LINE: TextId = TextId(74);
+    pub const PANEL_NO_STATION: TextId = TextId(75);
+    pub const PANEL_REBIRTH_DESC_FARE: TextId = TextId(76);
+    pub const PANEL_REBIRTH_DESC_LINE: TextId = TextId(77);
+    pub const PANEL_REBIRTH_DESC_REBIRTH: TextId = TextId(78);
+    pub const PANEL_REBIRTH_DESC_TRAIN: TextId = TextId(79);
+    pub const PANEL_REBIRTH_DO: TextId = TextId(80);
+    pub const PANEL_REBIRTH_DO_AGAIN: TextId = TextId(81);
+    pub const PANEL_REBIRTH_EARN: TextId = TextId(82);
+    pub const PANEL_REBIRTH_HINT: TextId = TextId(83);
+    pub const PANEL_REBIRTH_LOCK: TextId = TextId(84);
+    pub const PANEL_REBIRTH_LV: TextId = TextId(85);
+    pub const PANEL_REBIRTH_LV_MAX: TextId = TextId(86);
+    pub const PANEL_REBIRTH_NAME_FARE: TextId = TextId(87);
+    pub const PANEL_REBIRTH_NAME_LINE: TextId = TextId(88);
+    pub const PANEL_REBIRTH_NAME_TRAIN: TextId = TextId(89);
+    pub const PANEL_REBIRTH_POINTS: TextId = TextId(90);
+    pub const PANEL_RECOMMEND: TextId = TextId(91);
+    pub const PANEL_SCOPE_ALL: TextId = TextId(92);
+    pub const PANEL_SCOPE_COMPANY: TextId = TextId(93);
+    pub const PANEL_SCOPE_LINE: TextId = TextId(94);
+    pub const PANEL_SCOPE_STATION: TextId = TextId(95);
+    pub const PANEL_TAB_LINE: TextId = TextId(96);
+    pub const PANEL_TAB_REBIRTH: TextId = TextId(97);
+    pub const PANEL_TAB_STATION: TextId = TextId(98);
+    pub const PANEL_TAB_TRAIN: TextId = TextId(99);
+    pub const PARAM_R1_DESC: TextId = TextId(100);
+    pub const PARAM_R1_NAME: TextId = TextId(101);
+    pub const PARAM_R2_DESC: TextId = TextId(102);
+    pub const PARAM_R2_NAME: TextId = TextId(103);
+    pub const PARAM_R3_DESC: TextId = TextId(104);
+    pub const PARAM_R3_NAME: TextId = TextId(105);
+    pub const PARAM_S1_DESC: TextId = TextId(106);
+    pub const PARAM_S1_NAME: TextId = TextId(107);
+    pub const PARAM_S2_DESC: TextId = TextId(108);
+    pub const PARAM_S2_NAME: TextId = TextId(109);
+    pub const PARAM_S3_DESC: TextId = TextId(110);
+    pub const PARAM_S3_NAME: TextId = TextId(111);
+    pub const PARAM_S4_DESC: TextId = TextId(112);
+    pub const PARAM_S4_NAME: TextId = TextId(113);
+    pub const PARAM_T1_DESC: TextId = TextId(114);
+    pub const PARAM_T1_NAME: TextId = TextId(115);
+    pub const PARAM_T2_DESC: TextId = TextId(116);
+    pub const PARAM_T2_NAME: TextId = TextId(117);
+    pub const PARAM_T3_DESC: TextId = TextId(118);
+    pub const PARAM_T3_NAME: TextId = TextId(119);
+    pub const PARAM_T4_DESC: TextId = TextId(120);
+    pub const PARAM_T4_NAME: TextId = TextId(121);
+    pub const PARAM_T5_DESC: TextId = TextId(122);
+    pub const PARAM_T5_NAME: TextId = TextId(123);
+    pub const QUIT_CONFIRM1: TextId = TextId(124);
+    pub const QUIT_CONFIRM1_NOSAVE: TextId = TextId(125);
+    pub const QUIT_CONFIRM2: TextId = TextId(126);
+    pub const QUIT_POWER_OFF: TextId = TextId(127);
+    pub const QUIT_SAVING: TextId = TextId(128);
+    pub const RESET_CONFIRM1: TextId = TextId(129);
+    pub const RESET_CONFIRM2: TextId = TextId(130);
+    pub const SETTINGS_CONTINUE: TextId = TextId(131);
+    pub const SETTINGS_MUSIC: TextId = TextId(132);
+    pub const SETTINGS_OFF: TextId = TextId(133);
+    pub const SETTINGS_ON: TextId = TextId(134);
+    pub const SETTINGS_QUIT: TextId = TextId(135);
+    pub const SETTINGS_REPLAY: TextId = TextId(136);
+    pub const SETTINGS_REPLAY_EMPTY: TextId = TextId(137);
+    pub const SETTINGS_RESET: TextId = TextId(138);
+    pub const SETTINGS_SHOW: TextId = TextId(139);
+    pub const SETTINGS_SOUND: TextId = TextId(140);
+    pub const SETTINGS_TITLE: TextId = TextId(141);
+    pub const TITLE_CONTINUE: TextId = TextId(142);
+    pub const TITLE_HINT: TextId = TextId(143);
+    pub const TITLE_NEW_CONFIRM1: TextId = TextId(144);
+    pub const TITLE_NEW_GAME: TextId = TextId(145);
+    pub const TITLE_SUBTITLE: TextId = TextId(146);
+    pub const TUT_S01_P1: TextId = TextId(147);
+    pub const TUT_S01_P2: TextId = TextId(148);
+    pub const TUT_S01_TITLE: TextId = TextId(149);
+    pub const TUT_S02_G1: TextId = TextId(150);
+    pub const TUT_S02_P1: TextId = TextId(151);
+    pub const TUT_S02_TITLE: TextId = TextId(152);
+    pub const TUT_S03_G1: TextId = TextId(153);
+    pub const TUT_S03_P1: TextId = TextId(154);
+    pub const TUT_S03_P2: TextId = TextId(155);
+    pub const TUT_S03_P3: TextId = TextId(156);
+    pub const TUT_S03_TITLE: TextId = TextId(157);
+    pub const TUT_S04_P1: TextId = TextId(158);
+    pub const TUT_S04_TITLE: TextId = TextId(159);
+    pub const TUT_S04_W: TextId = TextId(160);
+    pub const TUT_S05_G1: TextId = TextId(161);
+    pub const TUT_S05_P1: TextId = TextId(162);
+    pub const TUT_S05_P2: TextId = TextId(163);
+    pub const TUT_S05_TITLE: TextId = TextId(164);
+    pub const TUT_S06_G1: TextId = TextId(165);
+    pub const TUT_S06_P1: TextId = TextId(166);
+    pub const TUT_S06_P2: TextId = TextId(167);
+    pub const TUT_S06_TITLE: TextId = TextId(168);
+    pub const TUT_S06_W: TextId = TextId(169);
+    pub const TUT_S07_G1: TextId = TextId(170);
+    pub const TUT_S07_P1: TextId = TextId(171);
+    pub const TUT_S07_P2: TextId = TextId(172);
+    pub const TUT_S07_TITLE: TextId = TextId(173);
+    pub const TUT_S08_P1: TextId = TextId(174);
+    pub const TUT_S08_TITLE: TextId = TextId(175);
+    pub const TUT_S09_G1: TextId = TextId(176);
+    pub const TUT_S09_G2: TextId = TextId(177);
+    pub const TUT_S09_P1: TextId = TextId(178);
+    pub const TUT_S09_P2: TextId = TextId(179);
+    pub const TUT_S09_P3: TextId = TextId(180);
+    pub const TUT_S09_P4: TextId = TextId(181);
+    pub const TUT_S09_TITLE: TextId = TextId(182);
+    pub const TUT_S10_G1: TextId = TextId(183);
+    pub const TUT_S10_G2: TextId = TextId(184);
+    pub const TUT_S10_P1: TextId = TextId(185);
+    pub const TUT_S10_P2: TextId = TextId(186);
+    pub const TUT_S10_TITLE: TextId = TextId(187);
+    pub const TUT_S11_G1: TextId = TextId(188);
+    pub const TUT_S11_G2: TextId = TextId(189);
+    pub const TUT_S11_P1: TextId = TextId(190);
+    pub const TUT_S11_P2: TextId = TextId(191);
+    pub const TUT_S11_TITLE: TextId = TextId(192);
+    pub const TUT_S12_G1: TextId = TextId(193);
+    pub const TUT_S12_G2: TextId = TextId(194);
+    pub const TUT_S12_P1: TextId = TextId(195);
+    pub const TUT_S12_P2: TextId = TextId(196);
+    pub const TUT_S12_P3: TextId = TextId(197);
+    pub const TUT_S12_TITLE: TextId = TextId(198);
+    pub const TUT_S14_P1: TextId = TextId(199);
+    pub const TUT_S14_TITLE: TextId = TextId(200);
+    pub const TUT_S15_P1: TextId = TextId(201);
+    pub const TUT_S15_P2: TextId = TextId(202);
+    pub const TUT_S15_P3: TextId = TextId(203);
+    pub const TUT_S15_TITLE: TextId = TextId(204);
 }
-pub const TEXT_COUNT: usize = 185;
+pub const TEXT_COUNT: usize = 205;
 static TEXTS: [&str; TEXT_COUNT] = [
     "路線を作る",
     "路線を延ばす",
@@ -225,6 +245,9 @@ static TEXTS: [&str; TEXT_COUNT] = [
     "先に駅を路線につなごう",
     "路線のはしの駅を選んでね",
     "駅を選んでね",
+    "もう一番上だよ",
+    "1無量大数円までかせごう",
+    "ポイントが足りないよ",
     "駅を2つ選んでね",
     "今はここを選んでね",
     "{btn:confirm}閉じる",
@@ -246,6 +269,7 @@ static TEXTS: [&str; TEXT_COUNT] = [
     "会社が大きくなったよ!",
     "1無量大数円!",
     "ホームが短いので通過するよ",
+    "転生した!+{n}ポイント",
     "{unit}({yomi})に届いたよ!",
     "新しく使えるようになったよ",
     "{btn:confirm}1つ {btn:max}MAX {btn:cancel}閉じる",
@@ -261,12 +285,28 @@ static TEXTS: [&str; TEXT_COUNT] = [
     "NEW",
     "先に路線を作ろう",
     "先に駅を路線につなごう",
+    "うるんだ運賃がずっと2倍になるよ",
+    "路線をもう1本作れるよ",
+    "会社を0からやり直して、ポイントをもらうよ",
+    "路線に最初から電車が1本増えるよ",
+    "転生する",
+    "もう一度{btn:confirm}で転生",
+    "+{n}ポイント",
+    "{btn:confirm}1つ {btn:cancel}閉じる",
+    "1無量大数円までかせごう",
+    "Lv{a}/{b}",
+    "MAX",
+    "運賃の倍率",
+    "路線の数",
+    "電車の数",
+    "ポイント {n}",
     "おすすめ",
     "全部",
     "会社で1つ",
     "この路線だけ",
     "この駅だけ",
     "路線",
+    "転生",
     "駅",
     "電車",
     "路線を走る電車が増えるよ",
@@ -412,6 +452,9 @@ static KEYS: [&str; TEXT_COUNT] = [
     "err.not_connected",
     "err.not_end",
     "err.not_station",
+    "err.rebirth_maxed",
+    "err.rebirth_not_ready",
+    "err.rebirth_points",
     "err.too_few",
     "err.tutorial",
     "expl.close",
@@ -433,6 +476,7 @@ static KEYS: [&str; TEXT_COUNT] = [
     "notice.company_up2",
     "notice.goal",
     "notice.pass",
+    "notice.rebirth",
     "notice.unit",
     "notice.unlocked",
     "panel.hint",
@@ -448,12 +492,28 @@ static KEYS: [&str; TEXT_COUNT] = [
     "panel.new",
     "panel.no_line",
     "panel.no_station",
+    "panel.rebirth.desc_fare",
+    "panel.rebirth.desc_line",
+    "panel.rebirth.desc_rebirth",
+    "panel.rebirth.desc_train",
+    "panel.rebirth.do",
+    "panel.rebirth.do_again",
+    "panel.rebirth.earn",
+    "panel.rebirth.hint",
+    "panel.rebirth.lock",
+    "panel.rebirth.lv",
+    "panel.rebirth.lv_max",
+    "panel.rebirth.name_fare",
+    "panel.rebirth.name_line",
+    "panel.rebirth.name_train",
+    "panel.rebirth.points",
     "panel.recommend",
     "panel.scope.all",
     "panel.scope.company",
     "panel.scope.line",
     "panel.scope.station",
     "panel.tab.line",
+    "panel.tab.rebirth",
     "panel.tab.station",
     "panel.tab.train",
     "param.r1.desc",
@@ -601,6 +661,9 @@ static PLACEHOLDERS: [&[&str]; TEXT_COUNT] = [
     &[],
     &[],
     &[],
+    &[],
+    &[],
+    &[],
     &["btn:confirm"],
     &["btn:confirm"],
     &["n", "m"],
@@ -620,6 +683,7 @@ static PLACEHOLDERS: [&[&str]; TEXT_COUNT] = [
     &[],
     &[],
     &[],
+    &["n"],
     &["unit", "yomi"],
     &[],
     &["btn:confirm", "btn:max", "btn:cancel"],
@@ -634,6 +698,22 @@ static PLACEHOLDERS: [&[&str]; TEXT_COUNT] = [
     &["money"],
     &[],
     &[],
+    &[],
+    &[],
+    &[],
+    &[],
+    &[],
+    &[],
+    &["btn:confirm"],
+    &["n"],
+    &["btn:confirm", "btn:cancel"],
+    &[],
+    &["a", "b"],
+    &[],
+    &[],
+    &[],
+    &[],
+    &["n"],
     &[],
     &[],
     &[],

@@ -130,6 +130,8 @@ pub(crate) fn sound_for_event(ev: &GameEvent) -> Option<SoundRequest> {
             }
         }
         GameEvent::GoalReached { .. } => Some(Jingle(JINGLE_GOAL)),
+        GameEvent::Rebirth { .. } => Some(SeAfterJingles(SE_RESET)),
+        GameEvent::RebirthUpgraded { .. } => Some(Se(SE_BUY)),
         GameEvent::TrainAdded { .. }
         | GameEvent::PassThroughResolved { .. }
         | GameEvent::FeatureUnlocked { .. }
@@ -137,10 +139,12 @@ pub(crate) fn sound_for_event(ev: &GameEvent) -> Option<SoundRequest> {
     }
 }
 
-/// `CommandError` → 効果音。お金が足りないときだけ `se_cannot_buy`。
+/// `CommandError` → 効果音。お金とポイントが足りないときだけ `se_cannot_buy`。
 pub(crate) fn sound_for_error(err: &CommandError) -> SoundId {
     match err {
-        CommandError::InsufficientFunds { .. } => SE_CANNOT_BUY,
+        CommandError::InsufficientFunds { .. } | CommandError::RebirthUpgradePoints { .. } => {
+            SE_CANNOT_BUY
+        }
         _ => SE_ERROR,
     }
 }

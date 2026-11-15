@@ -256,7 +256,7 @@ mod tests {
         assert_eq!(BalanceTable::builtin().config_hash(), CONFIG_HASH_GOLDEN);
     }
 
-    const CONFIG_HASH_GOLDEN: u64 = 0xf50a_a032_1416_ff4b;
+    const CONFIG_HASH_GOLDEN: u64 = 0x9297_b64e_31aa_95ca;
 
     #[test]
     fn config_hash_ignores_formatting_but_not_values() {

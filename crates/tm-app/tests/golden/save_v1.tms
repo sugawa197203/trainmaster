@@ -1,11 +1,11 @@
-SaveHeader(magic: "TMSAVE", save_format: 1, rules_version: 5, config_hash: 17657101426005311307, game_version: "0.1.0", seq: 13, tick: 36000, state_hash: 5357886249391719540, body_fnv: 166939817340689532)
+SaveHeader(magic: "TMSAVE", save_format: 1, rules_version: 6, config_hash: 10563111897977755082, game_version: "0.1.0", seq: 13, tick: 36000, state_hash: 11162658557750734633, body_fnv: 3271181641045930712)
 SaveBody(
     game: GameSnapshot(
-        format: 2,
-        rules_version: 5,
-        config_hash: 17657101426005311307,
+        format: 3,
+        rules_version: 6,
+        config_hash: 10563111897977755082,
         seed: 1,
-        state_hash: 5357886249391719540,
+        state_hash: 11162658557750734633,
         tick: 36000,
         money_bits: 4647811572469596160,
         total_earned_bits: 4647943513864929280,
@@ -17,6 +17,7 @@ SaveBody(
         waiting: SnapMatrix(rows: 3, cols: 27, data: [0, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         onboard: SnapMatrix(rows: 1, cols: 27, data: [0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         progress: SnapProgress(unlocked: 12435, upgraded_once: 1, max_money_unit: 0, goal_reached: false),
+        rebirth: SnapRebirth(count: 0, points: 0, fare_boost: 0, train_boost: 0, line_boost: 0),
         stats: SnapStats(income_this_sec_bits: 0, income_window_bits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 4621819117588971520], window_head: 0, arrivals: 59, delivered_lo: 397, delivered_hi: 0, purchases: 1),
         passenger_dest_words: 434,
         map_revision: 2,

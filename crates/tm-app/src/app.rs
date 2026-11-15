@@ -330,6 +330,9 @@ impl App {
                         if matches!(e, GameEvent::CompanyLevelUp { .. }) {
                             self.save.request(SaveCause::LevelUp);
                         }
+                        if matches!(e, GameEvent::Rebirth { .. }) {
+                            self.save.request(SaveCause::Rebirth);
+                        }
                         s.tutorial.observe_game(&e);
                         self.ui.observe(now, &e, &mut self.audio);
                     }

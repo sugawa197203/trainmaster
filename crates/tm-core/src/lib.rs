@@ -28,12 +28,13 @@ mod view;
 /// 2 = 1 週間のペース・線路の値段・40×18 のマップ(17 GW-17)。
 /// 3 = 駅の定員の伸び(S3 の `value_steps`)と、あとから出た駅・路線の強化の値段の下限(M8)。
 /// 4 = 駅の S1 は S3 のレベルまで(M9)。5 = 固有上限のある設備にも値段の下限、下限は会社 Lv4 以降に出たものだけ(M10)。
-pub const RULES_VERSION: u32 = 5;
+/// 6 = 転生(T1)。state_hash に転生の状態を追加。
+pub const RULES_VERSION: u32 = 6;
 
 pub use balance::{
     BALANCE_FORMAT_VERSION, BUILTIN_BALANCE_RON, BalanceError, BalanceSpec, BalanceTable,
-    CompanyRules, CostStep, EconomyRules, FeatureUnlock, MapRules, ParamDef, TrackCostRules,
-    TransitRules, UpgradeFloorRules, ValueFormula,
+    CompanyRules, CostStep, EconomyRules, FeatureUnlock, MapRules, ParamDef, RebirthRules,
+    RebirthUpgradeDef, TrackCostRules, TransitRules, UpgradeFloorRules, ValueFormula,
 };
 pub use command::{Command, CommandError, CommandKind, CommandPreview, LineEnd};
 pub use event::GameEvent;
@@ -46,7 +47,7 @@ pub use ids::{CompanyLevel, Level, LineId, StationId, TrainId};
 pub use invariants::{InvariantViolation, MonotonicSnapshot, check_monotonic};
 pub use param::{
     BuyMode, Feature, FeatureSet, LimitKind, LineLevels, ParamCategory, ParamKey, ParamOwner,
-    ParamSet, StationLevels, UpgradeScope,
+    ParamSet, RebirthUpgrade, StationLevels, UpgradeScope,
 };
 pub use recommend::{RecommendReason, Recommendation};
 pub use replay::{
@@ -55,7 +56,7 @@ pub use replay::{
 };
 pub use snapshot::{
     GameSnapshot, SNAPSHOT_FORMAT_VERSION, SnapCompany, SnapLine, SnapMatrix, SnapPhase,
-    SnapProgress, SnapStation, SnapStats, SnapTrain, SnapshotError,
+    SnapProgress, SnapRebirth, SnapStation, SnapStats, SnapTrain, SnapshotError,
 };
 pub use state::INCOME_WINDOW_SECS;
 pub use time::{POS_UNITS_PER_TILE, TICKS_PER_SEC, Tick, Ticks};
@@ -65,6 +66,6 @@ pub use units::{
     spawn_per_sec, train_capacity,
 };
 pub use view::{
-    CompanyView, GameView, GaugeView, LineView, StationView, TrackGridView, TrainPhaseView,
-    TrainView,
+    CompanyView, GameView, GaugeView, LineView, RebirthUpgradeView, RebirthView, StationView,
+    TrackGridView, TrainPhaseView, TrainView,
 };

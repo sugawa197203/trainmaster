@@ -207,7 +207,8 @@ pub(crate) fn check_all(st: &GameState, bal: &BalanceTable) -> Result<(), Invari
     inv18_reachable(st)?;
     inv19_unconnected(st)?;
     inv20_track_tiles(st)?;
-    inv21_line_born_level(st)
+    inv21_line_born_level(st)?;
+    inv22_rebirth(st, bal)
 }
 
 fn inv01_stations(st: &GameState, bal: &BalanceTable) -> Result<(), InvariantViolation> {
@@ -255,10 +256,13 @@ fn inv02_positions(st: &GameState, bal: &BalanceTable) -> Result<(), InvariantVi
 
 fn inv03_line_count(st: &GameState, bal: &BalanceTable) -> Result<(), InvariantViolation> {
     let n = count_u32(st.lines.len());
-    let slots = bal.line_slots(st.company.line_slots);
-    ensure(n <= slots && slots <= bal.max_lines(), "INV-03", || {
-        format!("路線 {n}、枠 {slots}、最大 {}", bal.max_lines())
-    })
+    let bonus = sim::rebirth::line_bonus(st, bal);
+    let slots = bal.line_slots(st.company.line_slots) + bonus;
+    ensure(
+        n <= slots && slots <= bal.max_lines() + bonus,
+        "INV-03",
+        || format!("路線 {n}、枠 {slots}、最大 {}", bal.max_lines()),
+    )
 }
 
 fn inv04_line_shape(st: &GameState) -> Result<(), InvariantViolation> {
@@ -307,7 +311,8 @@ fn inv05_trains(st: &GameState, bal: &BalanceTable) -> Result<(), InvariantViola
     }
     let mut total = 0usize;
     for l in &st.lines {
-        let want = bal.max_trains(l.levels.max_trains) as usize;
+        let want =
+            (bal.max_trains(l.levels.max_trains) + sim::rebirth::train_bonus(st, bal)) as usize;
         ensure(l.trains.len() == want, ID, || {
             format!("{}: 列車 {}、R1 で {want}", l.id, l.trains.len())
         })?;
@@ -641,6 +646,14 @@ fn inv20_track_tiles(st: &GameState) -> Result<(), InvariantViolation> {
             "track_tiles {} と線路のあるマス {n}",
             st.company.track_tiles
         )
+    })
+}
+
+/// 転生の強化のレベルが表の最大を超えていない [T1]。
+fn inv22_rebirth(st: &GameState, bal: &BalanceTable) -> Result<(), InvariantViolation> {
+    sim::rebirth::check_levels(st, bal).map_err(|detail| InvariantViolation {
+        id: "INV-22",
+        detail,
     })
 }
 

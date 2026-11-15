@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use tm_numeric::BigNum;
 
 use crate::ids::{CompanyLevel, Level, StationId};
-use crate::param::{Feature, ParamKey, ParamOwner};
+use crate::param::{Feature, ParamKey, ParamOwner, RebirthUpgrade};
 use crate::units::{Cars, MilliPeople, Money, People, Permille, Quarter, SpeedMilli};
 
 pub(crate) use derived::BalanceDerived;
@@ -20,8 +20,8 @@ pub use validate::BalanceError;
 
 /// `BalanceSpec` の形式の版。フィールドを変えたら上げる(config hash にも入る)。
 /// 3 = `value_steps` と `economy.upgrade_floor`(M8)。4 = `transit.spawn_level_margin`(M9)。
-/// 5 = `upgrade_floor.from_level`(M10)。
-pub const BALANCE_FORMAT_VERSION: u32 = 5;
+/// 5 = `upgrade_floor.from_level`(M10)。6 = `rebirth`(転生)。
+pub const BALANCE_FORMAT_VERSION: u32 = 6;
 
 /// 検証済みの表。`from_spec` / `from_ron_str` でしか作れない。
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +47,8 @@ pub struct BalanceSpec {
     pub transit: TransitRules,
     /// 経済。
     pub economy: EconomyRules,
+    /// 転生。
+    pub rebirth: RebirthRules,
 }
 
 /// 駅の生成 [01 §6.1 D-18]。
@@ -219,6 +221,36 @@ pub struct TrackCostRules {
     pub tile_cap: u32,
     /// 会社レベルがこれ未満の間はただ。
     pub free_below_level: u8,
+}
+
+/// 転生 [T1]。解放条件は累計収入がゴール(`10^goal_pow10` 円 = 1 無量大数)に届いたこと。
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RebirthRules {
+    /// 転生 1 回のポイントの基礎点。
+    pub points_base: u32,
+    /// そのときの会社レベル 1 ごとに増えるポイント。
+    pub points_per_level: u32,
+    /// 運賃倍率の強化 1 レベルごとの倍率。
+    pub fare_boost_ratio: u64,
+    /// 電車の数の強化 1 レベルごとに増える電車。
+    pub train_boost_trains: u32,
+    /// 路線の数の強化 1 レベルごとに増える枠。
+    pub line_boost_slots: u32,
+    /// ちょうど 3 個、`RebirthUpgrade` の順。
+    pub upgrades: Vec<RebirthUpgradeDef>,
+}
+
+/// 恒久の強化 1 つ [T1]。コストは `base_cost × cost_ratio^レベル` のポイント。
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RebirthUpgradeDef {
+    /// どの強化か。
+    pub key: RebirthUpgrade,
+    /// レベルの最大。
+    pub max: u8,
+    /// Lv0 → Lv1 のコスト(ポイント)。
+    pub base_cost: u32,
+    /// 1 レベルごとの倍率。
+    pub cost_ratio: u32,
 }
 
 impl BalanceTable {
@@ -412,5 +444,48 @@ impl BalanceTable {
     /// 初期所持金。
     pub fn initial_money(&self) -> Money {
         BigNum::from_u64(self.spec.economy.initial_money_yen)
+    }
+
+    /// 転生 1 回でもらえるポイント(そのときの会社レベルで決まる)[T1]。
+    pub fn rebirth_points(&self, c: CompanyLevel) -> u64 {
+        let r = &self.spec.rebirth;
+        u64::from(r.points_base) + u64::from(r.points_per_level) * u64::from(c.0)
+    }
+
+    /// 恒久の強化 1 つの定義。
+    pub fn rebirth_upgrade(&self, k: RebirthUpgrade) -> &RebirthUpgradeDef {
+        &self.spec.rebirth.upgrades[k.index()]
+    }
+
+    /// 恒久の強化の `from` → `from + 1` のコスト(ポイント)。`from < max` が前提。
+    pub fn rebirth_cost(&self, k: RebirthUpgrade, from: u8) -> u64 {
+        let def = self.rebirth_upgrade(k);
+        debug_assert!(
+            from < def.max,
+            "rebirth_cost: {k:?} のレベル {from} は最大以上"
+        );
+        u64::from(def.cost_ratio)
+            .checked_pow(u32::from(from))
+            .and_then(|r| u64::from(def.base_cost).checked_mul(r))
+            .expect("検証済みの表ではあふれない")
+    }
+
+    /// 運賃の倍率の強化の `level` レベル分の倍率(`fare_boost_ratio^level`)。
+    pub fn fare_boost_mul(&self, level: u8) -> u64 {
+        self.spec
+            .rebirth
+            .fare_boost_ratio
+            .checked_pow(u32::from(level))
+            .expect("検証済みの表ではあふれない")
+    }
+
+    /// 電車の数の強化の `level` レベル分の増加。
+    pub fn train_boost_trains(&self, level: u8) -> u32 {
+        self.spec.rebirth.train_boost_trains * u32::from(level)
+    }
+
+    /// 路線の数の強化の `level` レベル分の増加。
+    pub fn line_boost_slots(&self, level: u8) -> u32 {
+        self.spec.rebirth.line_boost_slots * u32::from(level)
     }
 }

@@ -5,6 +5,7 @@ mod boarding;
 mod company;
 mod economy;
 mod movement;
+pub(crate) mod rebirth;
 mod spawn;
 mod topology;
 
