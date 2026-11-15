@@ -13,7 +13,7 @@ use tm_tutorial::{
 
 use super::{cheap_game, harness_with_line, plan};
 use crate::AppRequest;
-use crate::scene::{PlayMode, PlayScene};
+use crate::scene::{PanelTab, PlayMode, PlayScene};
 use crate::testing::UiHarness;
 
 pub(super) fn play(h: &UiHarness) -> &PlayScene {
@@ -471,7 +471,9 @@ fn menu_opens_from_every_play_state_and_keeps_it() {
     h.press(Action::TabNext);
     open_settings(&mut h);
     h.press(Action::Cancel);
-    assert!(matches!(&play(&h).mode, PlayMode::Panel(p) if p.tab == ParamCategory::Train));
+    assert!(
+        matches!(&play(&h).mode, PlayMode::Panel(p) if p.tab == PanelTab::Param(ParamCategory::Train))
+    );
 }
 
 #[test]

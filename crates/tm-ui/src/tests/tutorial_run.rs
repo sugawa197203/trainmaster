@@ -159,7 +159,10 @@ impl Kid {
             self.press(Action::TabNext);
             return;
         };
-        let items = crate::scene::panel::items(panel.tab);
+        let Some(c) = panel.tab.category() else {
+            panic!("チュートリアルはパラメータのタブ");
+        };
+        let items = crate::scene::panel::items(c);
         let want = items.iter().position(|&x| x == p).expect("タブの項目");
         let now = panel.item_index();
         if now == want {

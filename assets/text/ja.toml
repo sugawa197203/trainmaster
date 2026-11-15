@@ -48,12 +48,30 @@ hint = "{btn:confirm}1つ {btn:max}MAX {btn:cancel}閉じる"
 station = "駅"
 train = "電車"
 line = "路線"
+rebirth = "転生"
 
 [panel.scope]
 all = "全部"
 station = "この駅だけ"
 line = "この路線だけ"
 company = "会社で1つ"
+
+[panel.rebirth]
+do = "転生する"
+do_again = "もう一度{btn:confirm}で転生"
+lock = "1無量大数円までかせごう"
+points = "ポイント {n}"
+earn = "+{n}ポイント"
+lv = "Lv{a}/{b}"
+lv_max = "MAX"
+name_fare = "運賃の倍率"
+name_train = "電車の数"
+name_line = "路線の数"
+desc_rebirth = "会社を0からやり直して、ポイントをもらうよ"
+desc_fare = "うるんだ運賃がずっと2倍になるよ"
+desc_train = "路線に最初から電車が1本増えるよ"
+desc_line = "路線をもう1本作れるよ"
+hint = "{btn:confirm}1つ {btn:cancel}閉じる"
 
 [param.s1]
 name = "お客さんの数"
@@ -136,6 +154,9 @@ no = "いいえ"
 
 [err]
 money = "お金が足りないよ"
+rebirth_not_ready = "1無量大数円までかせごう"
+rebirth_maxed = "もう一番上だよ"
+rebirth_points = "ポイントが足りないよ"
 limit_company = "今はここまで。会社レベルを上げよう"
 limit_intrinsic = "もう一番上だよ"
 limit_platform = "先にホームを長くしよう"
@@ -160,6 +181,7 @@ company_up = "会社レベル {n}!"
 company_up2 = "会社が大きくなったよ!"
 unlocked = "新しく使えるようになったよ"
 goal = "1無量大数円!"
+rebirth = "転生した!+{n}ポイント"
 
 [settings]
 title = "設定"

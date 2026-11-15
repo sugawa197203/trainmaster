@@ -9,7 +9,7 @@ use tm_platform_api::{AudioBus, MonoTime, SoundId};
 use tm_tutorial::{DirectiveKind, MenuAnchor, Tutorial, TutorialDirective, UiEvent};
 
 use super::build::BuildState;
-use super::panel::{PanelExit, PanelState};
+use super::panel::{PanelExit, PanelState, PanelTab};
 use super::settings_menu::{MenuExit, SettingsMenu};
 use super::{PlayMode, PlayScene, map_tiles, world_size};
 use crate::camera::Viewport;
@@ -167,6 +167,15 @@ pub(crate) fn error_text(err: CommandError) -> (TextId, Option<u64>) {
         | CommandError::UnknownLine(_)
         | CommandError::ScopeMismatch { .. }
         | CommandError::BendCountMismatch { .. } => (txt::ERR_GENERIC, None),
+        CommandError::RebirthNotReady => (txt::ERR_REBIRTH_NOT_READY, None),
+        CommandError::RebirthUpgradeMaxed { .. } => (txt::ERR_REBIRTH_MAXED, None),
+        CommandError::RebirthUpgradePoints {
+            required,
+            available,
+        } => {
+            let _ = (required, available);
+            (txt::ERR_REBIRTH_POINTS, None)
+        }
     }
 }
 
@@ -351,11 +360,13 @@ impl PlayScene {
                 return;
             }
             let line = st.lines.iter().min().copied();
-            let panel = PanelState::open(ParamCategory::Station, Some(id), line, cx);
+            let panel =
+                PanelState::open(PanelTab::Param(ParamCategory::Station), Some(id), line, cx);
             cx.se(SE_CONFIRM);
             self.mode = PlayMode::Panel(Box::new(panel));
         } else if let Some(line) = self.map.as_ref().and_then(|m| m.first_line_at(self.cursor)) {
-            let panel = PanelState::open(ParamCategory::Train, None, Some(line), cx);
+            let panel =
+                PanelState::open(PanelTab::Param(ParamCategory::Train), None, Some(line), cx);
             cx.se(SE_CONFIRM);
             self.mode = PlayMode::Panel(Box::new(panel));
         }

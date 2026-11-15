@@ -11,7 +11,7 @@ use tm_tutorial::{MenuAnchor, UiAnchor, UiEvent};
 use super::screens::{notice, play, ses, wait};
 use super::{cheap_game, create_line, fill_at, harness_with_line, map_tiles, plan, sprite_at};
 use crate::layout::{HUD, MAP_H, MAP_W, MAP_W_PANEL, MAP_Y, PANEL, TILE};
-use crate::scene::{PanelState, PlayMode};
+use crate::scene::{PanelState, PanelTab, PlayMode};
 use crate::testing::UiHarness;
 
 fn panel(h: &UiHarness) -> &PanelState {
@@ -71,7 +71,7 @@ fn confirm_on_a_connected_station_opens_the_station_tab() {
     let (mark, ev) = (h.audio.len(), h.ui_events.len());
     h.press(Action::Confirm);
     let p = panel(&h);
-    assert_eq!(p.tab, ParamCategory::Station);
+    assert_eq!(p.tab, PanelTab::Param(ParamCategory::Station));
     assert_eq!(p.target_station, None, "対象の初期値は ぜんぶ");
     assert_eq!(p.item_index(), 0);
     assert_eq!(ses(&h, mark), [SE_CONFIRM]);
@@ -114,7 +114,7 @@ fn confirm_on_track_opens_the_train_tab_for_that_line() {
     let mut h = harness_with_line();
     h.move_cursor_to(GridPos { x: 8, y: 4 });
     h.press(Action::Confirm);
-    assert_eq!(panel(&h).tab, ParamCategory::Train);
+    assert_eq!(panel(&h).tab, PanelTab::Param(ParamCategory::Train));
     h.press(Action::MoveRight);
     assert_eq!(panel(&h).target_line, Some(LineId(0)));
     assert_eq!(
@@ -128,23 +128,31 @@ fn confirm_on_track_opens_the_train_tab_for_that_line() {
 fn tab_opens_the_last_tab_and_tabs_wrap() {
     let mut h = harness_with_line();
     h.press(Action::TabNext);
-    assert_eq!(panel(&h).tab, ParamCategory::Station, "初回は えき");
+    assert_eq!(
+        panel(&h).tab,
+        PanelTab::Param(ParamCategory::Station),
+        "初回は えき"
+    );
     wait(&mut h, 400);
     let (mark, ev) = (h.audio.len(), h.ui_events.len());
     h.press(Action::TabPrev);
-    assert_eq!(panel(&h).tab, ParamCategory::Line, "左の端で折り返す");
+    assert_eq!(panel(&h).tab, PanelTab::Rebirth, "左の端で折り返す");
     assert_eq!(ses(&h, mark), [SE_CURSOR]);
     assert_eq!(
         h.ui_events[ev..],
         [
             UiEvent::MenuClosed(MenuAnchor::UpgradeTab(ParamCategory::Station)),
-            UiEvent::MenuOpened(MenuAnchor::UpgradeTab(ParamCategory::Line))
+            UiEvent::MenuOpened(MenuAnchor::UpgradeRebirth)
         ]
     );
     h.press(Action::TabNext);
-    assert_eq!(panel(&h).tab, ParamCategory::Station, "右の端で折り返す");
+    assert_eq!(
+        panel(&h).tab,
+        PanelTab::Param(ParamCategory::Station),
+        "右の端で折り返す"
+    );
     h.press(Action::TabNext);
-    assert_eq!(panel(&h).tab, ParamCategory::Train);
+    assert_eq!(panel(&h).tab, PanelTab::Param(ParamCategory::Train));
     wait(&mut h, 400);
     let (mark, ev) = (h.audio.len(), h.ui_events.len());
     h.press(Action::Cancel);
@@ -158,7 +166,11 @@ fn tab_opens_the_last_tab_and_tabs_wrap() {
         ]
     );
     h.press(Action::TabPrev);
-    assert_eq!(panel(&h).tab, ParamCategory::Train, "前回のタブ");
+    assert_eq!(
+        panel(&h).tab,
+        PanelTab::Param(ParamCategory::Train),
+        "前回のタブ"
+    );
 }
 
 #[test]
@@ -166,7 +178,7 @@ fn items_stop_at_the_ends_and_follow_the_table() {
     let mut h = cheap_with_line();
     h.press(Action::TabNext);
     h.press(Action::TabNext);
-    assert_eq!(panel(&h).tab, ParamCategory::Train);
+    assert_eq!(panel(&h).tab, PanelTab::Param(ParamCategory::Train));
     wait(&mut h, 400);
     let mark = h.audio.len();
     h.press(Action::MoveUp);
@@ -230,7 +242,8 @@ fn r2_is_company_wide_and_ignores_left_right() {
     let mut h = unlocked_with_line();
     h.press(Action::TabNext);
     h.press(Action::TabPrev);
-    assert_eq!(panel(&h).tab, ParamCategory::Line);
+    h.press(Action::TabPrev);
+    assert_eq!(panel(&h).tab, PanelTab::Param(ParamCategory::Line));
     h.press(Action::MoveRight);
     assert_eq!(panel(&h).target_line, Some(LineId(0)));
     h.press(Action::MoveDown);

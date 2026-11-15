@@ -16,7 +16,7 @@ use crate::layout::{
     BAND_LEFT, BAND_ROW2, BOX_BOTTOM, BOX_TOP_Y, Cam, EXPLAIN_X, HUD_ROW1, MAP_SCALE, SETTINGS,
     TILE, tile_screen,
 };
-use crate::scene::PlayMode;
+use crate::scene::{PanelTab, PlayMode};
 use crate::testing::UiHarness;
 
 /// 説明つきのゲーム(駅は `plan()` の順)。#1 の説明が出ている。
@@ -537,7 +537,7 @@ fn anchors_fall_back_to_the_entrance_when_hidden() {
         PlayMode::Panel(p) => p,
         _ => panic!("パネル"),
     };
-    assert_eq!(panel.tab, ParamCategory::Station);
+    assert_eq!(panel.tab, PanelTab::Param(ParamCategory::Station));
     assert_eq!(
         frame_rect(&h),
         panel

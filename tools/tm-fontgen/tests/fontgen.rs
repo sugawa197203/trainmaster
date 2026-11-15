@@ -45,13 +45,13 @@ fn assert_all_texts(entries: &[tm_fontgen::text::Entry]) {
 #[test]
 fn real_assets_counts() {
     let g = real();
-    assert_eq!(g.checked.chars.len(), 403);
+    assert_eq!(g.checked.chars.len(), 407);
     assert_eq!(g.checked.allowed.joyo.len(), 2136);
     assert_eq!(g.checked.allowed.number_units.len(), 23);
-    assert_eq!(g.checked.texts.kanji.len(), 93);
-    assert_eq!(g.positions.len(), 804);
+    assert_eq!(g.checked.texts.kanji.len(), 97);
+    assert_eq!(g.positions.len(), 812);
     for f in &g.faces {
-        assert_eq!(f.glyphs.len(), 403);
+        assert_eq!(f.glyphs.len(), 407);
         let empty: Vec<char> = f
             .glyphs
             .iter()
@@ -78,7 +78,7 @@ fn real_assets_counts() {
         }
     }
     assert_all_texts(&g.checked.texts.entries);
-    assert!(g.glyphs_rs.contains("pub const GLYPH_COUNT: usize = 804;"));
+    assert!(g.glyphs_rs.contains("pub const GLYPH_COUNT: usize = 812;"));
 }
 
 #[test]
@@ -88,9 +88,9 @@ fn glyph_serial_numbers() {
         "    GlyphEntry { ch: ' ', advance: 6, index: NO_BITMAP, w: 0, h: 0, x_off: 0, y_off: 0 },"
     ));
     assert!(s.contains("GlyphEntry { ch: '!', advance: 6, index: 0, "));
-    assert!(s.contains("GlyphEntry { ch: '!', advance: 8, index: 402, "));
+    assert!(s.contains("GlyphEntry { ch: '!', advance: 8, index: 406, "));
     assert!(s.contains("GlyphEntry { ch: '\\'', advance: 6, index: 6, "));
-    assert!(s.contains("static BODY12_GLYPHS: [GlyphEntry; 403] = ["));
+    assert!(s.contains("static BODY12_GLYPHS: [GlyphEntry; 407] = ["));
     assert!(s.contains(
         "pub static FACE_HEAD16: FontFace = FontFace { id: FontId::Head16, size_px: 16, "
     ));
@@ -155,7 +155,7 @@ fn font_chars_are_charset_text_kanji_and_numeric() {
     let got: std::collections::BTreeSet<char> = g.checked.chars.keys().copied().collect();
     assert_eq!(got, want);
     let kanji: Vec<char> = got.iter().copied().filter(|&c| is_kanji(c)).collect();
-    assert_eq!(kanji.len(), 118);
+    assert_eq!(kanji.len(), 122);
     assert!(!got.contains(&'丁') && !got.contains(&'港'));
     assert_eq!(g.checked.chars[&'電'], Source::Text);
     assert_eq!(g.checked.chars[&'秭'], Source::Numeric);

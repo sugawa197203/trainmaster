@@ -6,6 +6,7 @@ use super::SimScratch;
 use super::company::settle_company_level;
 use super::economy::{PurchasePlan, apply_purchase, plan_purchase, require_unlocked};
 use super::movement::place_initial_train;
+use super::rebirth::{self, RebirthPlan, UpgradePlan};
 use super::topology::{
     PassChange, add_line_tracks, extend_shape, insert_serving_line, new_line, rebuild_line_derived,
     relocate_trains, snapshot_anchors, station_index,
@@ -29,6 +30,8 @@ pub(crate) enum CheckedCommand {
     CreateLine(LinePlan),
     ExtendLine(ExtendPlan),
     LevelUp(PurchasePlan),
+    Rebirth(RebirthPlan),
+    RebirthUpgrade(UpgradePlan),
 }
 
 /// 線路の値段と新しいマスの数(11 §4.8、SIM-D-25)。検査で決め、適用はこの値を使う。
@@ -73,6 +76,14 @@ impl CheckedCommand {
                 new_pass_through: u32::from(!p.new_is_stop),
             },
             CheckedCommand::LevelUp(p) => p.preview(),
+            CheckedCommand::Rebirth(_) | CheckedCommand::RebirthUpgrade(_) => CommandPreview {
+                cost: Money::ZERO,
+                steps: 0,
+                raised: 0,
+                track_tiles: 0,
+                new_track_tiles: 0,
+                new_pass_through: 0,
+            },
         }
     }
 }
@@ -95,6 +106,10 @@ pub(crate) fn check_command(
         } => check_extend(st, bal, (*line, *end, *station, *bend)).map(CheckedCommand::ExtendLine),
         Command::LevelUp { param, scope, mode } => {
             plan_purchase(st, bal, *param, *scope, *mode).map(CheckedCommand::LevelUp)
+        }
+        Command::Rebirth => rebirth::check_rebirth(st, bal).map(CheckedCommand::Rebirth),
+        Command::RebirthUpgrade { upgrade } => {
+            rebirth::check_upgrade(st, bal, *upgrade).map(CheckedCommand::RebirthUpgrade)
         }
     }
 }
@@ -167,7 +182,7 @@ fn check_duplicate(stations: &[StationId]) -> Result<(), CommandError> {
 
 fn check_slot(st: &GameState, bal: &BalanceTable) -> Result<(), CommandError> {
     let used = count_u32(st.lines.len());
-    let slots = bal.line_slots(st.company.line_slots);
+    let slots = bal.line_slots(st.company.line_slots) + rebirth::line_bonus(st, bal);
     if used >= slots {
         return Err(CommandError::NoFreeLineSlot { used, slots });
     }
@@ -305,6 +320,12 @@ pub(crate) fn apply_command(
             &mut sc.stops_before,
             events,
         ),
+        (Command::Rebirth, CheckedCommand::Rebirth(plan)) => {
+            rebirth::apply_rebirth(st, bal, plan.points_earned, events)
+        }
+        (Command::RebirthUpgrade { .. }, CheckedCommand::RebirthUpgrade(plan)) => {
+            rebirth::apply_upgrade(st, &plan, sc, events)
+        }
         _ => unreachable!("検査の結果とコマンドの種類が合わない"),
     }
     // 10 TD-10: 成功したコマンドの後だけ判定する。
@@ -348,7 +369,7 @@ fn create_line(
         cost: track.cost,
         new_tiles: track.new_tiles,
     });
-    let n = bal.max_trains(Level::ZERO);
+    let n = bal.max_trains(Level::ZERO) + rebirth::train_bonus(st, bal);
     for k in 0..n {
         let train = place_initial_train(st, id, k, n);
         events.push(GameEvent::TrainAdded { train, line: id });

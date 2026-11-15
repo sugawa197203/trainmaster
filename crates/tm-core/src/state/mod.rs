@@ -10,7 +10,7 @@ mod train;
 pub(crate) use line::{Line, Section};
 pub(crate) use pax::PaxMatrix;
 pub use progress::INCOME_WINDOW_SECS;
-pub(crate) use progress::{CompanyState, Progress, Stats};
+pub(crate) use progress::{CompanyState, Progress, RebirthState, Stats};
 pub(crate) use station::Station;
 pub(crate) use track::{TileBits, TrackGrid, lay_track, walk_track};
 pub(crate) use train::{Direction, Train, TrainPhase};
@@ -47,6 +47,8 @@ pub(crate) struct GameState {
     pub onboard: PaxMatrix,
     pub tracks: TrackGrid,
     pub progress: Progress,
+    /// 転生の状態 (T1)。
+    pub rebirth: RebirthState,
     pub stats: Stats,
     pub rng: RngStreams,
     /// 導出: 経路表と要再計算の印。

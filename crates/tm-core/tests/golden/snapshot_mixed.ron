@@ -1,9 +1,9 @@
 (
-    format: 2,
-    rules_version: 5,
-    config_hash: 12257207011734365011,
+    format: 3,
+    rules_version: 6,
+    config_hash: 17763852392229017754,
     seed: 2,
-    state_hash: 17124892991150075892,
+    state_hash: 7369202905440060645,
     tick: 2561,
     money_bits: 4831355033193109210,
     total_earned_bits: 4758532781281116160,
@@ -71,6 +71,13 @@
         upgraded_once: 1439,
         max_money_unit: 3,
         goal_reached: false,
+    ),
+    rebirth: (
+        count: 0,
+        points: 0,
+        fare_boost: 0,
+        train_boost: 0,
+        line_boost: 0,
     ),
     stats: (
         income_this_sec_bits: 0,

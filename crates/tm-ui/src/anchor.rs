@@ -151,6 +151,7 @@ impl Places<'_> {
         match m {
             MenuAnchor::UpgradePanel
             | MenuAnchor::UpgradeTab(_)
+            | MenuAnchor::UpgradeRebirth
             | MenuAnchor::ScopeToggle
             | MenuAnchor::BuyMaxHint => self.panel_part(m),
             MenuAnchor::UpgradeItem(p) => match self.panel {

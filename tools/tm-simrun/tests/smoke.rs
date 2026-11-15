@@ -227,7 +227,9 @@ fn actions_follow_interval_and_build_times() {
                 let wait = match &a.cmd {
                     Command::CreateLine { .. } => u64::from(CREATE_S) * TPS,
                     Command::ExtendLine { .. } => u64::from(EXTEND_S) * TPS,
-                    Command::LevelUp { .. } => 1,
+                    Command::LevelUp { .. } | Command::Rebirth | Command::RebirthUpgrade { .. } => {
+                        1
+                    }
                 };
                 assert_eq!(a.tick.0 - a.decided_tick.0, wait, "{ctx} {a:?}");
                 if pause == Pause::NONE {

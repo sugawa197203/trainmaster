@@ -60,6 +60,7 @@ impl UiLocation {
             }
             MenuAnchor::SettingsMenu => self.settings_open = true,
             MenuAnchor::UpgradeItem(_)
+            | MenuAnchor::UpgradeRebirth
             | MenuAnchor::ScopeToggle
             | MenuAnchor::BuyMaxHint
             | MenuAnchor::SettingsItem(_)
@@ -92,6 +93,7 @@ impl UiLocation {
             }
             MenuAnchor::SettingsMenu => self.settings_open = false,
             MenuAnchor::UpgradeItem(_)
+            | MenuAnchor::UpgradeRebirth
             | MenuAnchor::ScopeToggle
             | MenuAnchor::BuyMaxHint
             | MenuAnchor::SettingsItem(_)

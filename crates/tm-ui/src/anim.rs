@@ -16,6 +16,7 @@ use tm_platform_api::{MonoTime, Rect, SoundId};
 
 use crate::draw::palette::{self, with_alpha};
 use crate::draw::{DrawBuilder, Shed, rect};
+use crate::hud::decimal;
 use crate::layout::{
     BANNER, BANNER_H3, Cam, GOAL_BAND, MAP_SCALE, MAP_X, SCREEN_H, SCREEN_W, TILE, TOAST,
     near_view, tile_center,
@@ -40,6 +41,7 @@ const BANNER_SLIDE_MS: u64 = 200;
 const BANNER_QUEUE: usize = 16;
 const TOAST_UNIT_MS: u64 = 3000;
 const TOAST_PASS_MS: u64 = 2500;
+const TOAST_REBIRTH_MS: u64 = 3500;
 const TOAST_QUEUE: usize = 4;
 /// 紙ふぶきの数の上限。
 pub(crate) const CONFETTI_MAX: u32 = 60;
@@ -501,6 +503,29 @@ impl Anims {
             now,
             Toast {
                 ms: TOAST_PASS_MS,
+                text,
+            },
+        );
+    }
+
+    /// 転生した。
+    pub(crate) fn rebirth(&mut self, now: MonoTime, points: u64) {
+        let mut buf = [0u8; 8];
+        let mut text = DynText::default();
+        text.set(
+            txt::NOTICE_REBIRTH,
+            &[TextArg {
+                name: "n",
+                value: decimal(points, &mut buf),
+            }],
+            FontId::Body12,
+            NOTICE_W,
+            InputDevice::Keyboard,
+        );
+        self.toasts.push(
+            now,
+            Toast {
+                ms: TOAST_REBIRTH_MS,
                 text,
             },
         );

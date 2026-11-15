@@ -5,7 +5,7 @@ use crate::command::{Command, CommandError, CommandPreview, LineEnd};
 use crate::game::Game;
 use crate::geom::{Bend, Dir8, GridPos, MapPoint, TrackMask, TrackSegment};
 use crate::ids::{CompanyLevel, Level, LineId, StationId, TrainId};
-use crate::param::{Feature, FeatureSet, LineLevels, ParamKey, StationLevels};
+use crate::param::{Feature, FeatureSet, LineLevels, ParamKey, RebirthUpgrade, StationLevels};
 use crate::recommend::Recommendation;
 use crate::sim;
 use crate::state::{Direction, GameState, Line, Station, Train, TrainPhase, lay_track};
@@ -70,12 +70,12 @@ impl<'a> GameView<'a> {
         }
     }
 
-    /// (使っている路線の数, 枠の数)。
+    /// (使っている路線の数, 枠の数。転生の強化の分を含む)。
     pub fn line_slots(&self) -> (u32, u32) {
         let st = self.st();
         (
             count_u32(st.lines.len()),
-            self.bal().line_slots(st.company.line_slots),
+            self.bal().line_slots(st.company.line_slots) + sim::rebirth::line_bonus(st, self.bal()),
         )
     }
 
@@ -112,6 +112,30 @@ impl<'a> GameView<'a> {
     /// ゴールに届いたか。
     pub fn goal_reached(&self) -> bool {
         self.st().progress.goal_reached
+    }
+
+    /// 転生の状態 (T1)。
+    pub fn rebirth(&self) -> RebirthView {
+        let (st, bal) = (self.st(), self.bal());
+        let upgrades = RebirthUpgrade::ALL.map(|k| {
+            let def = bal.rebirth_upgrade(k);
+            let level = st.rebirth.level(k);
+            let cost = (level < def.max).then(|| bal.rebirth_cost(k, level));
+            RebirthUpgradeView {
+                upgrade: k,
+                level,
+                max: def.max,
+                cost,
+                affordable: cost.is_some_and(|c| st.rebirth.points >= c),
+            }
+        });
+        RebirthView {
+            count: st.rebirth.count,
+            points: st.rebirth.points,
+            can_rebirth: st.progress.goal_reached,
+            next_points: bal.rebirth_points(st.company.level),
+            upgrades,
+        }
     }
 
     /// マップのマス数 (幅, 高さ)。
@@ -258,7 +282,9 @@ impl<'a> GameView<'a> {
             } else {
                 MilliPeople::ZERO
             },
-            fare: bal.fare(s.levels.fare),
+            fare: bal
+                .fare(s.levels.fare)
+                .mul_small(sim::rebirth::fare_mul(st, bal)),
             platform: bal.platform(s.levels.platform),
             lines: &s.serving_lines,
             born_level: bal.station_born_level(s.id),
@@ -514,4 +540,34 @@ pub struct TrackGridView<'a> {
     pub height: u8,
     /// 各マスの線路のつながり。
     pub masks: &'a [TrackMask],
+}
+
+/// 転生の状態の表示用の値 (T1)。
+#[derive(Clone, Copy, Debug)]
+pub struct RebirthView {
+    /// 転生した回数。
+    pub count: u32,
+    /// 持っている転生ポイント。
+    pub points: u64,
+    /// いま転生できるか(累計収入がゴールに届いたか)。
+    pub can_rebirth: bool,
+    /// いま転生したらもらえるポイント。
+    pub next_points: u64,
+    /// 恒久の強化(`RebirthUpgrade` の順)。
+    pub upgrades: [RebirthUpgradeView; 3],
+}
+
+/// 恒久の強化 1 つの表示用の値。
+#[derive(Clone, Copy, Debug)]
+pub struct RebirthUpgradeView {
+    /// どの強化か。
+    pub upgrade: RebirthUpgrade,
+    /// いまのレベル。
+    pub level: u8,
+    /// レベルの最大。
+    pub max: u8,
+    /// 次のレベルのコスト(ポイント。最大レベルなら `None`)。
+    pub cost: Option<u64>,
+    /// ポイントが足りて買えるか。
+    pub affordable: bool,
 }

@@ -2,6 +2,7 @@
 
 use super::economy::book_income;
 use super::movement::{arrival_index, begin_dwell, turn_at_arrival};
+use super::rebirth;
 use crate::balance::BalanceTable;
 use crate::event::GameEvent;
 use crate::ids::{StationId, TrainId};
@@ -60,7 +61,8 @@ fn arrive(st: &mut GameState, bal: &BalanceTable, tid: TrainId) -> ArrivalOutcom
     let ns = turn_at_arrival(line, &mut st.trains[ti]);
 
     let riders = st.trains[ti].riders;
-    let income = fare_income(riders, bal.fare(st.stations[s.index()].levels.fare));
+    let income = fare_income(riders, bal.fare(st.stations[s.index()].levels.fare))
+        .mul_small(rebirth::fare_mul(st, bal));
     book_income(st, income);
 
     let cols = st.onboard.cols();

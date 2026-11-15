@@ -16,14 +16,15 @@ use crate::rng::{RngStreams, STREAM_PASSENGER_DEST, StreamRng};
 use crate::routing::Routing;
 use crate::sim;
 use crate::state::{
-    CompanyState, Direction, GameState, INCOME_WINDOW_SECS, Line, PaxMatrix, Progress, Station,
-    Stats, Train, TrainPhase,
+    CompanyState, Direction, GameState, INCOME_WINDOW_SECS, Line, PaxMatrix, Progress,
+    RebirthState, Station, Stats, Train, TrainPhase,
 };
 use crate::time::{Tick, Ticks};
 use crate::units::{MilliPeople, Money, PosUnits};
 
 /// `GameSnapshot` の形の版。フィールドや意味を変えたら上げる。2 = `SnapLine::born_level`(M8)。
-pub const SNAPSHOT_FORMAT_VERSION: u32 = 2;
+/// 3 = `rebirth`(転生。T1)。
+pub const SNAPSHOT_FORMAT_VERSION: u32 = 3;
 
 // restore の後の step で足し込みがあふれないための上限。どれも 1 週間の遊びより何桁も大きい。
 const MAX_TICK: u64 = 1 << 40;
@@ -66,6 +67,9 @@ pub struct GameSnapshot {
     pub onboard: SnapMatrix,
     /// 解放・単位・ゴール。
     pub progress: SnapProgress,
+    /// 転生の状態 (T1)。形式 2 以前の写しにはないので既定値で読む(`RulesVersion` で断る)。
+    #[serde(default)]
+    pub rebirth: SnapRebirth,
     /// 統計。
     pub stats: SnapStats,
     /// 乗客の目的駅の乱数ストリームから取り出した語の数(10 TD-45)。
@@ -166,6 +170,21 @@ pub struct SnapProgress {
     pub goal_reached: bool,
 }
 
+/// 転生の状態の写し (T1)。
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SnapRebirth {
+    /// 転生した回数。
+    pub count: u32,
+    /// 持っている転生ポイント。
+    pub points: u64,
+    /// 運賃の倍率の強化のレベル。
+    pub fare_boost: u8,
+    /// 電車の数の強化のレベル。
+    pub train_boost: u8,
+    /// 路線の数の強化のレベル。
+    pub line_boost: u8,
+}
+
 /// 統計の写し。
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SnapStats {
@@ -254,6 +273,13 @@ impl Game {
                 upgraded_once: st.progress.upgraded_once.0,
                 max_money_unit: st.progress.max_money_unit,
                 goal_reached: st.progress.goal_reached,
+            },
+            rebirth: SnapRebirth {
+                count: st.rebirth.count,
+                points: st.rebirth.points,
+                fare_boost: st.rebirth.fare_boost,
+                train_boost: st.rebirth.train_boost,
+                line_boost: st.rebirth.line_boost,
             },
             stats: snap_stats(&st.stats),
             passenger_dest_words: st.rng.passenger_dest.words(),
@@ -501,6 +527,20 @@ fn check_shape(s: &GameSnapshot, bal: &BalanceTable) -> Result<(), String> {
     check_levels(bal, c, &|| "会社".to_string(), |p| {
         (p == ParamKey::R2LineSlots).then_some(slots)
     })?;
+    for k in crate::param::RebirthUpgrade::ALL {
+        let max = bal.rebirth_upgrade(k).max;
+        let level = match k {
+            crate::param::RebirthUpgrade::FareBoost => s.rebirth.fare_boost,
+            crate::param::RebirthUpgrade::TrainBoost => s.rebirth.train_boost,
+            crate::param::RebirthUpgrade::LineBoost => s.rebirth.line_boost,
+        };
+        ensure(level <= max, || {
+            format!("転生の {k:?} = {level} > 最大 {max}")
+        })?;
+    }
+    ensure(s.rebirth.count <= MAX_COUNT as u32, || {
+        format!("転生の回数 {}", s.rebirth.count)
+    })?;
     for (i, st) in s.stations.iter().enumerate() {
         let lv = station_levels(st.levels);
         check_levels(bal, c, &|| format!("S{i}"), |p| lv.get(p))?;
@@ -691,6 +731,13 @@ fn build_state(s: &GameSnapshot, bal: &BalanceTable) -> Result<GameState, String
             total_earned: money(s.total_earned_bits, "total_earned")?,
             max_money_unit: s.progress.max_money_unit,
             goal_reached: s.progress.goal_reached,
+        },
+        rebirth: RebirthState {
+            count: s.rebirth.count,
+            points: s.rebirth.points,
+            fare_boost: s.rebirth.fare_boost,
+            train_boost: s.rebirth.train_boost,
+            line_boost: s.rebirth.line_boost,
         },
         stats: Stats {
             income_this_sec: money(sv.income_this_sec_bits, "income_this_sec")?,

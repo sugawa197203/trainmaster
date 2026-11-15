@@ -9,6 +9,8 @@ pub enum MenuAnchor {
     UpgradePanel,
     /// 「えき」「電車」「ろせん」のタブ。
     UpgradeTab(ParamCategory),
+    /// 「てんせい」のタブ (T1)。チュートリアルは案内しないが、場所の記録のために出す。
+    UpgradeRebirth,
     /// パネルの各項目。
     UpgradeItem(ParamKey),
     /// 「この えきだけ / この ろせんだけ」と「ぜんぶ」の切り替え。

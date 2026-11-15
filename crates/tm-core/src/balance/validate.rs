@@ -5,7 +5,7 @@ use tm_numeric::BigNum;
 use super::derived::{self, BalanceDerived, cap_u32, cost_table, eval_money, eval_u64};
 use super::{BALANCE_FORMAT_VERSION, BalanceSpec, ValueFormula};
 use crate::ids::{CompanyLevel, Level};
-use crate::param::{Feature, ParamKey};
+use crate::param::{Feature, ParamKey, RebirthUpgrade};
 use crate::time::POS_UNITS_PER_TILE;
 
 /// 表の読み込み・検証のエラー。
@@ -64,6 +64,8 @@ fn check_structure(spec: &BalanceSpec) -> Result<(), BalanceError> {
             format!("format_version = {}", spec.format_version),
         ));
     }
+
+    check_rebirth(spec)?;
 
     let keys: Vec<ParamKey> = spec.params.iter().map(|p| p.key).collect();
     if keys != ParamKey::ALL {
@@ -311,6 +313,65 @@ fn check_structure(spec: &BalanceSpec) -> Result<(), BalanceError> {
             format!(
                 "マップ {} × {} が {MAX_MAP_TILES} マスを超える",
                 map.width, map.height
+            ),
+        ));
+    }
+    Ok(())
+}
+
+/// 転生の検査(BV-23)。
+fn check_rebirth(spec: &BalanceSpec) -> Result<(), BalanceError> {
+    let r = &spec.rebirth;
+    if r.points_base < 1 || r.points_per_level < 1 {
+        return Err(invalid(
+            "BV-23",
+            format!(
+                "points_base = {}、points_per_level = {}",
+                r.points_base, r.points_per_level
+            ),
+        ));
+    }
+    let keys: Vec<RebirthUpgrade> = r.upgrades.iter().map(|u| u.key).collect();
+    if keys != RebirthUpgrade::ALL {
+        return Err(invalid("BV-23", format!("upgrades の並び = {keys:?}")));
+    }
+    for u in &r.upgrades {
+        if u.max < 1 || u.base_cost < 1 || u.cost_ratio < 1 {
+            return Err(invalid(
+                "BV-23",
+                format!(
+                    "{:?}: max = {}、base_cost = {}、cost_ratio = {}",
+                    u.key, u.max, u.base_cost, u.cost_ratio
+                ),
+            ));
+        }
+        // 最大レベルまでの倍率が u64 に収まること(コストと運賃の倍率で使う)。
+        let top = u128::from(u.base_cost)
+            .checked_mul((u128::from(u.cost_ratio)).pow(u32::from(u.max - 1)));
+        if top.is_none_or(|v| v > u128::from(u64::MAX)) {
+            return Err(invalid(
+                "BV-23",
+                format!("{:?}: 最大レベルのコストが u64 を超える", u.key),
+            ));
+        }
+    }
+    let fare_top = (u128::from(r.fare_boost_ratio)).checked_pow(u32::from(
+        r.upgrades
+            .get(RebirthUpgrade::FareBoost.index())
+            .map_or(0, |u| u.max),
+    ));
+    if r.fare_boost_ratio < 1 || fare_top.is_none_or(|v| v > u128::from(u64::MAX)) {
+        return Err(invalid(
+            "BV-23",
+            format!("fare_boost_ratio = {} が u64 を超える", r.fare_boost_ratio),
+        ));
+    }
+    if r.train_boost_trains < 1 || r.line_boost_slots < 1 {
+        return Err(invalid(
+            "BV-23",
+            format!(
+                "train_boost_trains = {}、line_boost_slots = {}",
+                r.train_boost_trains, r.line_boost_slots
             ),
         ));
     }

@@ -503,8 +503,8 @@ mod tests {
     use crate::param::{FeatureSet, LineLevels, ParamSet, StationLevels};
     use crate::rng::{RngStreams, StreamRng, below};
     use crate::state::{
-        CompanyState, INCOME_WINDOW_SECS, Line, PaxMatrix, Progress, Section, Station, Stats,
-        TrackGrid,
+        CompanyState, INCOME_WINDOW_SECS, Line, PaxMatrix, Progress, RebirthState, Section,
+        Station, Stats, TrackGrid,
     };
     use crate::time::Tick;
     use crate::units::{MilliPeople, Money, People, section_length};
@@ -770,6 +770,7 @@ mod tests {
                 max_money_unit: 0,
                 goal_reached: false,
             },
+            rebirth: RebirthState::default(),
             stats: Stats {
                 income_this_sec: Money::ZERO,
                 income_window: [Money::ZERO; INCOME_WINDOW_SECS],

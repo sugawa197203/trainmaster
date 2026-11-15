@@ -81,6 +81,32 @@ impl ParamKey {
     }
 }
 
+/// 転生ポイントで買う恒久の強化(転生しても残る)。宣言の順 = 表示の順。
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[repr(u8)]
+pub enum RebirthUpgrade {
+    /// 運賃の倍率。
+    FareBoost = 0,
+    /// 電車の数。
+    TrainBoost,
+    /// 路線の数。
+    LineBoost,
+}
+
+impl RebirthUpgrade {
+    /// 宣言の順のすべての強化。
+    pub const ALL: [RebirthUpgrade; 3] = [
+        RebirthUpgrade::FareBoost,
+        RebirthUpgrade::TrainBoost,
+        RebirthUpgrade::LineBoost,
+    ];
+
+    /// `ALL` の中の位置。
+    pub const fn index(self) -> usize {
+        self as usize
+    }
+}
+
 /// パラメータの持ち主。
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParamOwner {

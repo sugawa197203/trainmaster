@@ -471,6 +471,11 @@ fn reference_hash(st: &GameState) -> u64 {
     h.write_u16(st.progress.upgraded_once.0);
     h.write_u8(st.progress.max_money_unit);
     h.write_bool(st.progress.goal_reached);
+    h.write_u32(st.rebirth.count);
+    h.write_u64(st.rebirth.points);
+    h.write_u8(st.rebirth.fare_boost);
+    h.write_u8(st.rebirth.train_boost);
+    h.write_u8(st.rebirth.line_boost);
     h.write_money(st.stats.income_this_sec);
     st.stats
         .income_window
@@ -508,8 +513,8 @@ fn hash_golden() {
     assert_eq!(b.state_hash(), BUSY_HASH_GOLDEN, "{:#018x}", b.state_hash());
 }
 
-const INITIAL_HASH_GOLDEN: u64 = 0x52e7_5b03_7f87_2b41;
-const BUSY_HASH_GOLDEN: u64 = 0x3e5b_d884_3e36_bf67;
+const INITIAL_HASH_GOLDEN: u64 = 0xa6d6_364d_1245_59c8;
+const BUSY_HASH_GOLDEN: u64 = 0x5baf_2bd7_2fa6_b0a8;
 
 #[test]
 fn unlocked_matches_company_level_zero() {
