@@ -47,7 +47,7 @@ pub(crate) struct GameState {
     pub onboard: PaxMatrix,
     pub tracks: TrackGrid,
     pub progress: Progress,
-    /// 転生の状態 [T1]。
+    /// 転生の状態 (T1)。
     pub rebirth: RebirthState,
     pub stats: Stats,
     pub rng: RngStreams,

@@ -223,7 +223,7 @@ pub struct TrackCostRules {
     pub free_below_level: u8,
 }
 
-/// 転生 [T1]。解放条件は累計収入がゴール(`10^goal_pow10` 円 = 1 無量大数)に届いたこと。
+/// 転生 (T1)。解放条件は累計収入がゴール(`10^goal_pow10` 円 = 1 無量大数)に届いたこと。
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RebirthRules {
     /// 転生 1 回のポイントの基礎点。
@@ -240,7 +240,7 @@ pub struct RebirthRules {
     pub upgrades: Vec<RebirthUpgradeDef>,
 }
 
-/// 恒久の強化 1 つ [T1]。コストは `base_cost × cost_ratio^レベル` のポイント。
+/// 恒久の強化 1 つ (T1)。コストは `base_cost × cost_ratio^レベル` のポイント。
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RebirthUpgradeDef {
     /// どの強化か。
@@ -446,7 +446,7 @@ impl BalanceTable {
         BigNum::from_u64(self.spec.economy.initial_money_yen)
     }
 
-    /// 転生 1 回でもらえるポイント(そのときの会社レベルで決まる)[T1]。
+    /// 転生 1 回でもらえるポイント(そのときの会社レベルで決まる)(T1)。
     pub fn rebirth_points(&self, c: CompanyLevel) -> u64 {
         let r = &self.spec.rebirth;
         u64::from(r.points_base) + u64::from(r.points_per_level) * u64::from(c.0)

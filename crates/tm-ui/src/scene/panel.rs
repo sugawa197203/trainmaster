@@ -27,7 +27,7 @@ use crate::text::numbers::NumText;
 pub(crate) enum PanelTab {
     /// パラメータのタブ。
     Param(ParamCategory),
-    /// てんせい [T1]。
+    /// てんせい (T1)。
     Rebirth,
 }
 
@@ -197,15 +197,15 @@ enum Status {
         affordable: bool,
     },
     Note(Option<SpriteId>),
-    /// 転生ポイントの値段。星のアイコン [T1]。
+    /// 転生ポイントの値段。星のアイコン (T1)。
     Points {
         affordable: bool,
     },
-    /// 転生でもらえるポイント [T1]。
+    /// 転生でもらえるポイント (T1)。
     Earn,
 }
 
-/// てんせいタブの行 [T1]。
+/// てんせいタブの行 (T1)。
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RebRow {
     /// 「転生する」。
@@ -272,7 +272,7 @@ pub(crate) struct PanelState {
     levelup: DynText,
     /// 買った項目と、その時刻(「レベルアップ!」を出す)。
     flash: Option<(ParamKey, MonoTime)>,
-    /// 「転生する」の 2 段の確認(もう一度 Confirm で確定)[T1]。
+    /// 「転生する」の 2 段の確認(もう一度 Confirm で確定)(T1)。
     rebirth_confirm: bool,
     /// 止める説明を出している(`permits` による行の暗さを付けない。UI-D-31)。
     pub explaining: bool,
@@ -349,7 +349,7 @@ impl PanelState {
         list[self.item[tab_index(self.tab)].min(list.len() - 1)]
     }
 
-    /// てんせいタブで選んでいる行 [T1]。
+    /// てんせいタブで選んでいる行 (T1)。
     fn rebirth_row(&self) -> RebRow {
         let i = self.item[tab_index(self.tab)];
         if i == 0 {
@@ -489,7 +489,7 @@ impl PanelState {
         self.tab.category().map(|_| self.param())
     }
 
-    /// 決定ボタン [T1]。
+    /// 決定ボタン (T1)。
     fn confirm(&mut self, cx: &mut Ctx<'_, '_>) {
         match self.tab {
             PanelTab::Param(_) => self.buy(BuyMode::One, cx),
@@ -718,7 +718,7 @@ impl PanelState {
         }
     }
 
-    /// てんせいタブの表示 [T1]。
+    /// てんせいタブの表示 (T1)。
     fn refresh_rebirth(&mut self, view: GameView<'_>, gate: Gate<'_>, dev: InputDevice) {
         let r = view.rebirth();
         // 対象行の代わりに、ポイントの所持数を出す。

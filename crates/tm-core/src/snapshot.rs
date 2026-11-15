@@ -67,7 +67,7 @@ pub struct GameSnapshot {
     pub onboard: SnapMatrix,
     /// 解放・単位・ゴール。
     pub progress: SnapProgress,
-    /// 転生の状態 [T1]。形式 2 以前の写しにはないので既定値で読む(`RulesVersion` で断る)。
+    /// 転生の状態 (T1)。形式 2 以前の写しにはないので既定値で読む(`RulesVersion` で断る)。
     #[serde(default)]
     pub rebirth: SnapRebirth,
     /// 統計。
@@ -170,7 +170,7 @@ pub struct SnapProgress {
     pub goal_reached: bool,
 }
 
-/// 転生の状態の写し [T1]。
+/// 転生の状態の写し (T1)。
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SnapRebirth {
     /// 転生した回数。

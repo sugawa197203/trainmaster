@@ -114,7 +114,7 @@ impl<'a> GameView<'a> {
         self.st().progress.goal_reached
     }
 
-    /// 転生の状態 [T1]。
+    /// 転生の状態 (T1)。
     pub fn rebirth(&self) -> RebirthView {
         let (st, bal) = (self.st(), self.bal());
         let upgrades = RebirthUpgrade::ALL.map(|k| {
@@ -542,7 +542,7 @@ pub struct TrackGridView<'a> {
     pub masks: &'a [TrackMask],
 }
 
-/// 転生の状態の表示用の値 [T1]。
+/// 転生の状態の表示用の値 (T1)。
 #[derive(Clone, Copy, Debug)]
 pub struct RebirthView {
     /// 転生した回数。

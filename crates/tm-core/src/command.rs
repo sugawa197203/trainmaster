@@ -35,9 +35,9 @@ pub enum Command {
         /// 1 段か MAX か。
         mode: BuyMode,
     },
-    /// 転生する [T1]。会社は最初からやり直し、転生ポイントをもらう。
+    /// 転生する (T1)。会社は最初からやり直し、転生ポイントをもらう。
     Rebirth,
-    /// 転生ポイントで恒久の強化を買う [T1]。
+    /// 転生ポイントで恒久の強化を買う (T1)。
     RebirthUpgrade {
         /// 買う強化。
         upgrade: RebirthUpgrade,
@@ -183,14 +183,14 @@ pub enum CommandError {
         /// 所持金。
         available: Money,
     },
-    /// 転生の条件(累計収入がゴールの 1 無量大数円)に届いていない [T1]。
+    /// 転生の条件(累計収入がゴールの 1 無量大数円)に届いていない (T1)。
     RebirthNotReady,
-    /// 転生の強化がすでに最大レベル [T1]。
+    /// 転生の強化がすでに最大レベル (T1)。
     RebirthUpgradeMaxed {
         /// 強化。
         upgrade: RebirthUpgrade,
     },
-    /// 転生ポイントが足りない [T1]。
+    /// 転生ポイントが足りない (T1)。
     RebirthUpgradePoints {
         /// 必要なポイント。
         required: u64,

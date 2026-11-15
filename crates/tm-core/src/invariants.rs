@@ -649,7 +649,7 @@ fn inv20_track_tiles(st: &GameState) -> Result<(), InvariantViolation> {
     })
 }
 
-/// 転生の強化のレベルが表の最大を超えていない [T1]。
+/// 転生の強化のレベルが表の最大を超えていない (T1)。
 fn inv22_rebirth(st: &GameState, bal: &BalanceTable) -> Result<(), InvariantViolation> {
     sim::rebirth::check_levels(st, bal).map_err(|detail| InvariantViolation {
         id: "INV-22",

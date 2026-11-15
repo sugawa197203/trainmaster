@@ -130,14 +130,14 @@ pub enum GameEvent {
         /// 届いたときの累計収入。
         total_earned: Money,
     },
-    /// 転生した [T1]。会社は最初の状態に戻り、転生ポイントが増える。
+    /// 転生した (T1)。会社は最初の状態に戻り、転生ポイントが増える。
     Rebirth {
         /// もらったポイント。
         points_earned: u64,
         /// 転生した回数(1 始まり)。
         count: u32,
     },
-    /// 転生の強化を買えた [T1]。
+    /// 転生の強化を買えた (T1)。
     RebirthUpgraded {
         /// 強化。
         upgrade: RebirthUpgrade,

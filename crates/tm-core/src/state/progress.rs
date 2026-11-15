@@ -14,7 +14,7 @@ pub(crate) struct CompanyState {
     pub track_tiles: u32,
 }
 
-/// 転生の状態 [T1]。転生してもリセットされない。
+/// 転生の状態 (T1)。転生してもリセットされない。
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) struct RebirthState {
     /// 転生した回数。
